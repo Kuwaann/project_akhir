@@ -19,7 +19,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
-  void register() async{
+  void register() async {
     final email = _emailController.text;
     final namaDepan = _namaDepanController.text;
     final namaBelakang = _namaBelakangController.text;
@@ -27,16 +27,19 @@ class _RegisterPageState extends State<RegisterPage> {
     final password = _passwordController.text;
     final confirmPassword = _confirmPasswordController.text;
 
-    if(password != confirmPassword){
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Password tidak sesuai")));
+    if (password != confirmPassword) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Password tidak sesuai")));
     }
 
-    try{
-      final response = await authService.signUpWithEmailPassword(email, password);
-      final userId = response.user?.id;
+    try {
+      final response = await authService.signUpWithEmailPassword(
+        email,
+        password,
+      );
 
       await authService.saveUserDataLocally(
-        id: userId!,
         firstName: namaDepan,
         lastName: namaBelakang,
         username: username,
@@ -44,16 +47,16 @@ class _RegisterPageState extends State<RegisterPage> {
       );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Registrasi berhasil")),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("Registrasi berhasil")));
         Navigator.pop(context);
       }
-    }
-
-    catch(e){
-      if(mounted){
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: $e")));
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Error: $e")));
       }
     }
   }
@@ -63,9 +66,7 @@ class _RegisterPageState extends State<RegisterPage> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       backgroundColor: Color.fromARGB(255, 255, 255, 255),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-      ),
+      appBar: AppBar(backgroundColor: Colors.transparent),
       body: SingleChildScrollView(
         child: Container(
           width: double.infinity,
@@ -114,8 +115,8 @@ class _RegisterPageState extends State<RegisterPage> {
                               fillColor: Color.fromARGB(255, 252, 252, 252),
                               labelText: "Nama Depan",
                               border: UnderlineInputBorder(
-                                  borderRadius: BorderRadius.circular(0),
-                              )
+                                borderRadius: BorderRadius.circular(0),
+                              ),
                             ),
                           ),
                         ),
@@ -127,8 +128,8 @@ class _RegisterPageState extends State<RegisterPage> {
                               fillColor: Color.fromARGB(255, 252, 252, 252),
                               labelText: "Nama Belakang",
                               border: UnderlineInputBorder(
-                                  borderRadius: BorderRadius.circular(0),
-                              )
+                                borderRadius: BorderRadius.circular(0),
+                              ),
                             ),
                           ),
                         ),
@@ -136,14 +137,14 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                     SizedBox(height: 20),
                     TextFormField(
-                      controller: _nameController,
+                      controller: _usernameController,
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: Color.fromARGB(255, 252, 252, 252),
                         labelText: "Username",
                         border: UnderlineInputBorder(
-                            borderRadius: BorderRadius.circular(0),
-                        )
+                          borderRadius: BorderRadius.circular(0),
+                        ),
                       ),
                     ),
                     SizedBox(height: 20),
@@ -154,8 +155,8 @@ class _RegisterPageState extends State<RegisterPage> {
                         fillColor: Color.fromARGB(255, 252, 252, 252),
                         labelText: "Email",
                         border: UnderlineInputBorder(
-                            borderRadius: BorderRadius.circular(0),
-                        )
+                          borderRadius: BorderRadius.circular(0),
+                        ),
                       ),
                     ),
                     SizedBox(height: 20),
@@ -169,7 +170,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           labelText: "Password",
                           border: UnderlineInputBorder(
                             borderRadius: BorderRadius.circular(0),
-                          )
+                          ),
                         ),
                       ),
                     ),
@@ -184,7 +185,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           labelText: "Confirm Password",
                           border: UnderlineInputBorder(
                             borderRadius: BorderRadius.circular(0),
-                          )
+                          ),
                         ),
                       ),
                     ),
@@ -200,12 +201,12 @@ class _RegisterPageState extends State<RegisterPage> {
                           shadowColor: Colors.transparent,
                         ),
                         child: Text(
-                            "Sign Up",
-                            style: TextStyle(
-                              color: const Color.fromARGB(255, 255, 255, 255),
-                              fontWeight: FontWeight.w800,
-                              fontSize: 15,
-                            ),
+                          "Sign Up",
+                          style: TextStyle(
+                            color: const Color.fromARGB(255, 255, 255, 255),
+                            fontWeight: FontWeight.w800,
+                            fontSize: 15,
+                          ),
                         ),
                       ),
                     ),
@@ -214,15 +215,14 @@ class _RegisterPageState extends State<RegisterPage> {
                       children: [
                         Text("Sudah punya akun?"),
                         GestureDetector(
-                          onTap: (){
+                          onTap: () {
                             Navigator.pushNamed(context, '/login');
                           },
-                          child: Text(" Masuk di sini.", 
-                            style: TextStyle(
-                              fontWeight: FontWeight.w800,
-                            ),
-                          )
-                        )
+                          child: Text(
+                            " Masuk di sini.",
+                            style: TextStyle(fontWeight: FontWeight.w800),
+                          ),
+                        ),
                       ],
                     ),
                   ],

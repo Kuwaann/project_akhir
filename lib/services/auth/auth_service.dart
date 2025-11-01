@@ -8,7 +8,10 @@ class AuthService {
   final SupabaseClient _supabase = Supabase.instance.client;
 
   // 🔹 SIGN IN
-  Future<AuthResponse> signInWithEmailPassword(String email, String password) async {
+  Future<AuthResponse> signInWithEmailPassword(
+    String email,
+    String password,
+  ) async {
     final response = await _supabase.auth.signInWithPassword(
       email: email,
       password: password,
@@ -16,32 +19,38 @@ class AuthService {
 
     final user = response.user;
     if (user != null) {
-      // Jika user login berhasil, ambil data lokalnya (kalau ada)
-      final existingUser = userBox.get(user.id);
+      // Setelah login, cari user di Hive berdasarkan email
+      final userInBox = userBox.values.firstWhere(
+        (userModel) => userModel.email == email,
+        orElse: () => UserModel(
+          id: -1,
+          firstName: '',
+          lastName: '',
+          username: '',
+          email: '',
+        ), // return dummy if not found
+      );
 
-      // Jika belum ada di Hive, tambahkan minimal datanya
-      if (existingUser == null) {
-        await userBox.put(
-          user.id,
-          UserModel(
-            id: user.id,
-            firstName: '',
-            lastName: '',
-            username: '',
-            email: user.email ?? '',
-          ),
-        );
+      // Jika user ditemukan di Hive, simpan Hive key-nya ke session
+      if (userInBox.id != -1) {
+        await sessionBox.put('currentUserKey', userInBox.key);
+      } else {
+        // Kasus jarang terjadi: user ada di Supabase tapi tidak di Hive.
+        // Anda bisa menambahkan logic untuk mengambil data dari server jika perlu,
+        // atau membiarkannya karena data akan dibuat saat registrasi.
+        // Untuk saat ini, kita pastikan session kosong jika data lokal tidak ada.
+        await sessionBox.delete('currentUserKey');
       }
-
-      // Simpan user yang sedang aktif
-      await sessionBox.put('currentUserId', user.id);
     }
 
     return response;
   }
 
   // 🔹 SIGN UP
-  Future<AuthResponse> signUpWithEmailPassword(String email, String password) async {
+  Future<AuthResponse> signUpWithEmailPassword(
+    String email,
+    String password,
+  ) async {
     final response = await _supabase.auth.signUp(
       email: email,
       password: password,
@@ -51,38 +60,61 @@ class AuthService {
 
   // 🔹 SIMPAN DATA USER LOKAL
   Future<void> saveUserDataLocally({
-    required String id,
     required String firstName,
     required String lastName,
     required String username,
     required String email,
   }) async {
     final user = UserModel(
-      id: id,
+      id: 0, // ID awal, akan diabaikan oleh Hive saat menggunakan add()
       firstName: firstName,
       lastName: lastName,
       username: username,
       email: email,
     );
 
-    // Simpan user berdasarkan id unik (biar gak ketimpa)
-    await userBox.put(id, user);
+    // `add` akan menyimpan objek dan memberikan auto-incrementing key (integer)
+    final int userKey = await userBox.add(user);
 
-    // Simpan id user yang aktif
-    await sessionBox.put('currentUserId', id);
+    // Simpan key dari user yang baru saja dibuat sebagai user aktif
+    await sessionBox.put('currentUserKey', userKey);
+  }
+
+  // 🔹 SINKRONISASI SESI LOKAL SAAT APP START
+  Future<void> syncLocalSession(String email) async {
+    // Cek apakah sesi lokal sudah ada
+    if (sessionBox.get('currentUserKey') != null) {
+      return; // Jika sudah ada, tidak perlu melakukan apa-apa
+    }
+
+    // Jika sesi lokal belum ada, cari user di Hive berdasarkan email
+    final userInBox = userBox.values.firstWhere(
+      (userModel) => userModel.email == email,
+      orElse: () => UserModel(
+        id: -1,
+        firstName: '',
+        lastName: '',
+        username: '',
+        email: '',
+      ),
+    );
+
+    // Jika user ditemukan di Hive, simpan Hive key-nya ke session
+    if (userInBox.id != -1) {
+      await sessionBox.put('currentUserKey', userInBox.key);
+    }
   }
 
   // 🔹 GET USER YANG SEDANG AKTIF
   UserModel? getCurrentUser() {
-    final currentUserId = sessionBox.get('currentUserId');
-    if (currentUserId == null) return null;
-
-    return userBox.get(currentUserId);
+    final currentUserKey = sessionBox.get('currentUserKey');
+    if (currentUserKey == null) return null;
+    return userBox.get(currentUserKey);
   }
 
   // 🔹 SIGN OUT
   Future<void> signOut() async {
     await _supabase.auth.signOut();
-    await sessionBox.delete('currentUserId');
+    await sessionBox.delete('currentUserKey');
   }
 }

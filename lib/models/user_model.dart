@@ -2,10 +2,10 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 part 'user_model.g.dart'; // otomatis dihasilkan nanti
 
-@HiveType(typeId: 0)
+@HiveType(typeId: 0) // Pastikan typeId unik
 class UserModel extends HiveObject {
   @HiveField(0)
-  String id;
+  int id;
 
   @HiveField(1)
   String firstName;

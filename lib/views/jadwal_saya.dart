@@ -1,14 +1,41 @@
 import 'package:flutter/material.dart';
-import 'package:project_akhir/components/navbar.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import '../models/booking_model.dart';
+
+// Mocking the imported Navbar component
+class Navbar extends StatelessWidget {
+  const Navbar({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BottomAppBar(
+      color: Colors.white,
+      child: Container(height: 50, color: Colors.transparent),
+    );
+  }
+}
 
 class BookingSayaPage extends StatefulWidget {
-  const BookingSayaPage({super.key});
+  final String userId;
+  const BookingSayaPage({super.key, required this.userId});
 
   @override
   State<BookingSayaPage> createState() => _BookingSayaPageState();
 }
 
 class _BookingSayaPageState extends State<BookingSayaPage> {
+  late final Box<BookingModel> _bookingBox;
+
+  @override
+  void initState() {
+    super.initState();
+    _bookingBox = Hive.box<BookingModel>('bookingBox');
+    Intl.defaultLocale = 'id_ID';
+    initializeDateFormatting('id_ID', null);
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -16,242 +43,289 @@ class _BookingSayaPageState extends State<BookingSayaPage> {
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
+          title: const Text(
+            'Booking Saya',
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w900),
+          ),
+          centerTitle: false,
+          elevation: 0,
           backgroundColor: Colors.white,
-          bottom: TabBar(
+          bottom: const TabBar(
             labelColor: Colors.black,
-            indicatorColor: Color.fromARGB(255, 0, 0, 0),
+            indicatorColor: Colors.black,
+            labelStyle: TextStyle(fontWeight: FontWeight.w600),
+            unselectedLabelStyle: TextStyle(fontWeight: FontWeight.w400),
             tabs: [
-              Tab(icon: Icon(Icons.access_time), text: 'Riwayat'), 
-              Tab(icon: Icon(Icons.history), text: 'Aktif'),
-            ]
+              Tab(icon: Icon(Icons.history), text: 'Riwayat'),
+              Tab(icon: Icon(Icons.schedule), text: 'Aktif'),
+            ],
           ),
         ),
         body: SafeArea(
-          child: Stack(
+          child: TabBarView(
             children: [
-              TabBarView(
-                children: [
-                  Container(
-                    width: double.infinity,
-                    height: double.infinity,
-                    padding: EdgeInsets.symmetric(horizontal: 30),
-                    child: ScrollConfiguration(
-                      behavior: ScrollConfiguration.of(context).copyWith(
-                        scrollbars: false, // ⛔ sembunyikan scrollbar
-                        overscroll: false, // opsional: hilangkan efek glow
-                      ),
-                      child: SingleChildScrollView(
-                        child: Column(
-                          children: [
-                            SizedBox(height: 20),
-                            TextField(
-                              decoration: InputDecoration(
-                                filled: true,
-                                fillColor: Color.fromARGB(255, 252, 252, 252),
-                                hintText: 'Cari lapangan...',
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(30),
-                                  borderSide: const BorderSide(
-                                    color: Color.fromARGB(255, 238, 238, 238), 
-                                    width: 1,
-                                  ),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(30),
-                                  borderSide: const BorderSide(
-                                    color: Color.fromARGB(255, 238, 238, 238), 
-                                    width: 1,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: 30),
-                            ItemLapangan(),
-                            SizedBox(height: 120),
-                          ],
-                        ),
-                      ),
-                    )
-                  ),
-                  Container(
-                    width: double.infinity,
-                    height: double.infinity,
-                    padding: EdgeInsets.symmetric(horizontal: 30),
-                    child: ScrollConfiguration(
-                      behavior: ScrollConfiguration.of(context).copyWith(
-                        scrollbars: false, // ⛔ sembunyikan scrollbar
-                        overscroll: false, // opsional: hilangkan efek glow
-                      ),
-                      child: SingleChildScrollView(
-                        child: Column(
-                          children: [
-                            SizedBox(height: 20),
-                            TextField(
-                              decoration: InputDecoration(
-                                filled: true,
-                                fillColor: Color.fromARGB(255, 252, 252, 252),
-                                hintText: 'Cari lapangan...',
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(30),
-                                  borderSide: const BorderSide(
-                                    color: Color.fromARGB(255, 238, 238, 238), 
-                                    width: 1,
-                                  ),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(30),
-                                  borderSide: const BorderSide(
-                                    color: Color.fromARGB(255, 238, 238, 238), 
-                                    width: 1,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: 30),
-                            ItemLapangan(),
-                            SizedBox(height: 120),
-                          ],
-                        ),
-                      ),
-                    )
-                    
-                  ),
-                ],
-              ),
+              _buildBookingList('Riwayat'),
+              _buildBookingList('Aktif'),
             ],
           ),
-        )
+        ),
+        bottomNavigationBar: const Navbar(),
       ),
+    );
+  }
+
+  Widget _buildBookingList(String tabType) {
+    return ValueListenableBuilder<Box<BookingModel>>(
+      valueListenable: _bookingBox.listenable(),
+      builder: (context, box, child) {
+        final allBookings = box.values.toList();
+        final filteredBookings = allBookings
+            .where((b) => b.userId == widget.userId)
+            .where((b) => b.bookingType == tabType)
+            .toList();
+
+        filteredBookings.sort(
+            (a, b) => b.tanggalBooking.compareTo(a.tanggalBooking));
+
+        return ScrollConfiguration(
+          behavior: ScrollConfiguration.of(context).copyWith(
+            scrollbars: false,
+            overscroll: false,
+          ),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 30),
+            child: Column(
+              children: [
+                const SizedBox(height: 20),
+                const TextField(
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Color.fromARGB(255, 252, 252, 252),
+                    hintText: 'Cari lapangan...',
+                    prefixIcon: Icon(Icons.search, color: Colors.grey),
+                    contentPadding:
+                        EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(30)),
+                      borderSide: BorderSide(
+                        color: Color.fromARGB(255, 238, 238, 238),
+                        width: 1,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(30)),
+                      borderSide: BorderSide(
+                        color: Color.fromARGB(255, 150, 150, 150),
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 30),
+
+                if (filteredBookings.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 80),
+                    child: Center(
+                      child: Text(
+                        tabType == 'Aktif'
+                            ? 'Anda belum memiliki booking yang aktif saat ini.'
+                            : 'Belum ada riwayat booking untuk akun ini.',
+                        style:
+                            TextStyle(color: Colors.grey[600], fontSize: 16),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  )
+                else
+                  Column(
+                    children: filteredBookings
+                        .map((booking) => Padding(
+                              padding: const EdgeInsets.only(bottom: 15),
+                              child: ItemLapangan(booking: booking),
+                            ))
+                        .toList(),
+                  ),
+
+                const SizedBox(height: 120),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
 
+// --- ItemLapangan (Booking Card)
 class ItemLapangan extends StatelessWidget {
-  const ItemLapangan({
-    super.key,
-  });
+  final BookingModel booking;
+
+  const ItemLapangan({super.key, required this.booking});
+
+  Map<String, dynamic> _getStatusStyle(String status) {
+    switch (status) {
+      case 'Pending':
+        return {
+          'color': Colors.blue.shade100,
+          'textColor': Colors.blue.shade700
+        };
+      case 'Paid':
+        return {
+          'color': Colors.green.shade100,
+          'textColor': Colors.green.shade700
+        };
+      case 'Selesai':
+        return {
+          'color': Colors.grey.shade300,
+          'textColor': Colors.grey.shade700
+        };
+      case 'Dibatalkan':
+        return {
+          'color': Colors.red.shade100,
+          'textColor': Colors.red.shade700
+        };
+      default:
+        return {'color': Colors.grey.shade100, 'textColor': Colors.black};
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final statusStyle = _getStatusStyle(booking.statusPembayaran);
+    final dateFormatter = DateFormat('dd/MM/yyyy', 'id_ID');
+
     return Ink(
       width: double.infinity,
-      height: 170,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(15),
         border: Border.all(
-          color: Color.fromARGB(255, 238, 238, 238), 
+          color: const Color.fromARGB(255, 238, 238, 238),
           width: 1,
         ),
         color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 5,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(15),
-        onTap:() {
-          Navigator.pushNamed(context, '/detail_book');
+        onTap: () {
+          Navigator.pushNamed(
+            context,
+            '/detail_book',
+            arguments: booking,
+          );
         },
         child: Row(
           children: [
             Expanded(
               flex: 2,
               child: ClipRRect(
-                borderRadius: BorderRadius.only(topLeft: Radius.circular(15), bottomLeft: Radius.circular(15)),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: double.infinity,
-                  child: Image.asset('assets/images/contohlapangan.jpg', fit: BoxFit.cover)
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(15),
+                  bottomLeft: Radius.circular(15),
                 ),
-              )
+                child: booking.imageUrl.isNotEmpty
+                    ? Image.network(
+                        booking.imageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: Colors.grey.shade300,
+                            child: const Center(
+                              child: Icon(Icons.broken_image,
+                                  size: 40, color: Colors.grey),
+                            ),
+                          );
+                        },
+                      )
+                    : Container(
+                        color: Colors.grey.shade300,
+                        child: const Center(
+                          child: Icon(Icons.sports_soccer,
+                              size: 40, color: Colors.grey),
+                        ),
+                      ),
+              ),
             ),
             Expanded(
               flex: 3,
               child: Padding(
-                padding: EdgeInsets.all(15),
+                padding: const EdgeInsets.all(15),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    Text(
+                      booking.namaLapangan,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                "Lapangan ABCD",
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w800,
-                                )
-                              ),
+                        const Icon(Icons.sports_soccer,
+                            color: Colors.black, size: 16),
+                        const SizedBox(width: 5),
+                        Text(booking.jenisLapangan,
+                            style: TextStyle(
+                                fontSize: 12, color: Colors.grey.shade700)),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        const Icon(Icons.calendar_month,
+                            color: Colors.black, size: 16),
+                        const SizedBox(width: 5),
+                        Text(
+                          dateFormatter.format(booking.tanggalBooking),
+                          style: TextStyle(
+                              fontSize: 12, color: Colors.grey.shade700),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: statusStyle['color'],
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          child: Text(
+                            booking.statusPembayaran,
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: statusStyle['textColor'],
+                              fontWeight: FontWeight.bold,
                             ),
-                            Text("30/10/2025", textAlign: TextAlign.right, style: TextStyle(fontSize: 10))
-                          ],
+                          ),
                         ),
                         Row(
                           children: [
-                            Icon(Icons.sports_soccer, color: Colors.black, size: 16),
-                            SizedBox(width: 5),
-                            Text("Mini Soccer"),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Icon(Icons.location_city, color: Colors.black, size: 16),
-                            SizedBox(width: 5),
-                            Text("Jakarta Pusat"),
+                            const Icon(Icons.access_time,
+                                color: Colors.black54, size: 16),
+                            const SizedBox(width: 5),
+                            Text(
+                              '${booking.jamMulai} - ${booking.jamSelesai}',
+                              style: const TextStyle(
+                                  fontSize: 12, fontWeight: FontWeight.w600),
+                            ),
                           ],
                         ),
                       ],
                     ),
-                    Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(Icons.access_time, color: Colors.black, size:16),
-                                SizedBox(width: 5),
-                                Text("Status: ", style: TextStyle(fontSize: 10)),
-                              ],
-                            ),
-                            Container(
-                              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: const Color.fromARGB(255, 101, 255, 106).withOpacity(0.8),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Text(
-                                "Aktif", 
-                                style: TextStyle(
-                                  fontSize: 10, 
-                                  color: const Color.fromARGB(255, 0, 0, 0).withOpacity(0.5),
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              )
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 5),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(Icons.calendar_month, color: Colors.black, size:16),
-                                SizedBox(width: 5),
-                                Text("Tanggal Main:", style: TextStyle(fontSize: 10)),
-                              ],
-                            ),
-                            Expanded(child: Text("30/10/2025 08:00-10:00", textAlign: TextAlign.right, style: TextStyle(fontSize: 10))),
-                          ],
-                        ),
-                      ],
-                    )
                   ],
                 ),
               ),

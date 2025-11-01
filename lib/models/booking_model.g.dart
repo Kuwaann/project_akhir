@@ -1,54 +1,54 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'lapangan_model.dart';
+part of 'booking_model.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
 
-class TempatOlahragaAdapter extends TypeAdapter<TempatOlahraga> {
+class BookingModelAdapter extends TypeAdapter<BookingModel> {
   @override
-  final int typeId = 1;
+  final int typeId = 2;
 
   @override
-  TempatOlahraga read(BinaryReader reader) {
+  BookingModel read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return TempatOlahraga(
-      id: fields[0] as String,
-      namaTempat: fields[1] as String,
-      jenisLapangan: fields[2] as String,
-      lokasiWilayah: fields[3] as String,
-      ratingAvg: fields[4] as double,
-      hargaSewa: fields[5] as int,
-      latitude: fields[6] as double,
-      longitude: fields[7] as double,
+    return BookingModel(
+      namaLapangan: fields[0] as String,
+      jenisLapangan: fields[1] as String,
+      tanggalBooking: fields[2] as DateTime,
+      jamMulai: fields[3] as String,
+      durasiJam: fields[4] as int,
+      totalHarga: fields[5] as int,
+      statusPembayaran: fields[6] as String,
+      userId: fields[7] as String,
       imageUrl: fields[8] as String,
     );
   }
 
   @override
-  void write(BinaryWriter writer, TempatOlahraga obj) {
+  void write(BinaryWriter writer, BookingModel obj) {
     writer
       ..writeByte(9)
       ..writeByte(0)
-      ..write(obj.id)
+      ..write(obj.namaLapangan)
       ..writeByte(1)
-      ..write(obj.namaTempat)
-      ..writeByte(2)
       ..write(obj.jenisLapangan)
+      ..writeByte(2)
+      ..write(obj.tanggalBooking)
       ..writeByte(3)
-      ..write(obj.lokasiWilayah)
+      ..write(obj.jamMulai)
       ..writeByte(4)
-      ..write(obj.ratingAvg)
+      ..write(obj.durasiJam)
       ..writeByte(5)
-      ..write(obj.hargaSewa)
+      ..write(obj.totalHarga)
       ..writeByte(6)
-      ..write(obj.latitude)
+      ..write(obj.statusPembayaran)
       ..writeByte(7)
-      ..write(obj.longitude)
+      ..write(obj.userId)
       ..writeByte(8)
       ..write(obj.imageUrl);
   }
@@ -59,7 +59,7 @@ class TempatOlahragaAdapter extends TypeAdapter<TempatOlahraga> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is TempatOlahragaAdapter &&
+      other is BookingModelAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/lapangan_model.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class LapanganService {
   final String apiUrl =
@@ -42,6 +43,17 @@ class LapanganService {
       } else {
         rethrow; // lempar error lagi kalau cache kosong
       }
+    }
+  }
+
+  void openMap(double latitude, double longitude) async {
+    final url = 'google.com/maps/search/?api=1&query=$latitude,$longitude';
+    final uri = Uri.parse(url);
+
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      throw 'Could not launch $url';
     }
   }
 }

@@ -1,26 +1,30 @@
+// lib/models/user_model.dart
+
 import 'package:hive_flutter/hive_flutter.dart';
 
-part 'user_model.g.dart'; // otomatis dihasilkan nanti
+part 'user_model.g.dart';
 
 @HiveType(typeId: 0) // Pastikan typeId unik
 class UserModel extends HiveObject {
   @HiveField(0)
-  int id;
+  // 🚀 PERUBAHAN UTAMA: Ubah int menjadi String untuk menampung Supabase UID
+  late String id; 
 
   @HiveField(1)
-  String firstName;
+  late String firstName;
 
   @HiveField(2)
-  String lastName;
+  late String lastName;
 
   @HiveField(3)
-  String username;
+  late String username;
 
   @HiveField(4)
-  String email;
+  late String email;
 
   UserModel({
-    required this.id,
+    // PERUBAHAN DI CONSTRUCTOR
+    required this.id, // Sekarang menerima String (Supabase UID)
     required this.firstName,
     required this.lastName,
     required this.username,

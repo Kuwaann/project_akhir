@@ -63,6 +63,7 @@ class Navbar extends StatelessWidget {
               ),
               IconButton(
                 onPressed: (){
+                  Navigator.pushNamed(context, '/profil');
                 }, 
                 icon: Icon(
                   Icons.person

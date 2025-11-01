@@ -4,7 +4,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 part 'lapangan_model.g.dart';
 
-@HiveType(typeId: 0)
+@HiveType(typeId: 1)
 class TempatOlahraga extends HiveObject {
   @HiveField(0)
   late String id;

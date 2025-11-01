@@ -16,6 +16,7 @@ class _AuthGateState extends State<AuthGate> {
 
   @override
   Widget build(BuildContext context) {
+    // Memantau status autentikasi dari Supabase
     return StreamBuilder<AuthState>(
       stream: Supabase.instance.client.auth.onAuthStateChange,
       builder: (context, snapshot) {
@@ -28,22 +29,25 @@ class _AuthGateState extends State<AuthGate> {
         final session = snapshot.hasData ? snapshot.data!.session : null;
 
         if (session != null) {
-          // Jika ada sesi Supabase, kita perlu memastikan sesi lokal (Hive) juga di-set.
-          // Kita gunakan FutureBuilder untuk menjalankan proses ini.
+          // Jika ada sesi Supabase (User terautentikasi),
+          // jalankan proses sinkronisasi sesi lokal (Hive).
           return FutureBuilder(
-            future: _authService.syncLocalSession(session.user.email!),
+            // 🚀 PERBAIKAN: syncLocalSession() dipanggil tanpa argumen email
+            future: _authService.syncLocalSession(), 
             builder: (context, syncSnapshot) {
               if (syncSnapshot.connectionState == ConnectionState.waiting) {
+                // Tampilkan loading saat Hive sedang disinkronisasi
                 return const Scaffold(
                   body: Center(child: CircularProgressIndicator()),
                 );
               }
-              // Setelah sesi lokal sinkron, baru tampilkan HomePage
+              
+              // Setelah sinkronisasi selesai, user bisa masuk ke HomePage
               return const HomePage();
             },
           );
         } else {
-          // Jika tidak ada sesi sama sekali, tampilkan WelcomePage
+          // Jika tidak ada sesi Supabase, arahkan ke WelcomePage untuk Login/Register
           return const WelcomePage();
         }
       },

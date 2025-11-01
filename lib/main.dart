@@ -1,9 +1,11 @@
 // ignore_for_file: unused_import
 
 import 'package:flutter/material.dart';
+import 'package:project_akhir/models/booking_model.dart';
 import 'package:project_akhir/services/auth/auth_gate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:project_akhir/models/user_model.dart';
+import 'package:project_akhir/views/akun_page.dart';
 import 'package:project_akhir/views/book_detail.dart';
 import 'package:project_akhir/views/booking_page.dart';
 import 'package:project_akhir/views/home_page.dart';
@@ -28,11 +30,13 @@ void main() async {
 
   // 2. Registrasi adapter
   Hive.registerAdapter(UserModelAdapter());
-  // Hive.registerAdapter(TempatOlahragaAdapter());
+  Hive.registerAdapter(TempatOlahragaAdapter());
+  Hive.registerAdapter(BookingModelAdapter());
 
   // 3. Buka semua box yang akan digunakan
   await Hive.openBox<UserModel>('userBox');
-  // await Hive.openBox<TempatOlahraga>('lapanganBox');
+  await Hive.openBox<TempatOlahraga>('lapanganBox');
+  await Hive.openBox<BookingModel>('bookingBox');
   await Hive.openBox('sessionBox');
 
   await Supabase.initialize(
@@ -59,12 +63,62 @@ class MyApp extends StatelessWidget {
         '/home': (context) => HomePage(),
         '/search': (context) => SearchPage(),
         '/settings': (context) => SettingsPage(),
-        '/detail_lapangan': (context) => LapanganDetail(),
-        '/booking_saya': (context) => BookingSayaPage(),
-        '/detail_book': (context) => BookDetail(),
-        '/booking': (context) => BookingPage(),
+        '/detail_lapangan': (context) {
+          // Ketika rute '/detail' dipanggil, kita berharap ada argumen
+          // yang dilewatkan, yaitu objek TempatOlahraga.
+            final settings = ModalRoute.of(context)?.settings;
+            final tempat = settings?.arguments as TempatOlahraga?;
+
+            // Pastikan data tidak null sebelum membangun widget
+            if (tempat == null) {
+              // Handle error atau kembali ke halaman sebelumnya
+              return const Scaffold(body: Center(child: Text('Error: Data Lapangan tidak ditemukan.')));
+            }
+            
+            return LapanganDetail(tempat: tempat);
+        },
+        '/booking_saya': (context) {
+          final currentUserId = Supabase.instance.client.auth.currentUser?.id ?? 'guest_user_id';
+
+          return BookingSayaPage(userId: currentUserId);
+        },
+        '/detail_book': (context) {
+          final settings = ModalRoute.of(context)?.settings;
+          final booking = settings?.arguments as BookingModel?;
+
+          if (booking == null) {
+            return const Scaffold(
+              body: Center(child: Text('Error: Data booking tidak ditemukan.')),
+            );
+          }
+
+          return BookDetail(booking: booking);
+        },
+        '/booking': (context) {
+          // Ambil argumen data lapangan
+            final settings = ModalRoute.of(context)?.settings;
+            final tempat = settings?.arguments as TempatOlahraga?;
+            
+            // 1. Ambil Supabase User ID
+            final currentUserId = Supabase.instance.client.auth.currentUser?.id;
+
+            // Pastikan data lapangan tidak null sebelum membangun widget
+            if (tempat == null) {
+              return const Scaffold(body: Center(child: Text('Error: Data Lapangan tidak ditemukan.')));
+            }
+            
+            // 2. Pastikan user ID tidak null
+            if (currentUserId == null) {
+              // Jika user ID tidak ada, arahkan kembali ke login atau tampilkan pesan error
+              return const Scaffold(body: Center(child: Text('Error: Pengguna belum login. Silakan coba login ulang.')));
+            }
+            
+            // FIX: Panggil BookingPage dengan userId yang sudah diambil
+            return BookingPage(tempat: tempat, userId: currentUserId); 
+        },
         '/sarankesan' : (context) => SaranKesanPage(),
         '/zonawaktu' : (context) => KonversiZonaWaktuPage(),
+        '/profil' : (context) => ProfilePage(),
       },
       initialRoute: '/',
     );

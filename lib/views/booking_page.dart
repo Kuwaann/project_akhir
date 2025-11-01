@@ -1,28 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:intl/date_symbol_data_local.dart'; // <--- tambahkan ini
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:hive_flutter/hive_flutter.dart'; // <--- Import Hive
+import '../models/lapangan_model.dart'; 
+import '../models/booking_model.dart'; 
+// Hapus: import '../services/booking_service.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-// Ganti dari StatefulWidget menjadi StatelessWidget atau hapus constructor-nya
 class BookingPage extends StatefulWidget {
-  const BookingPage({super.key});
+  final TempatOlahraga tempat; 
+  // FIX: Tambahkan parameter userId yang dibutuhkan
+  final String userId;
+
+  const BookingPage({super.key, required this.tempat, required this.userId});
 
   @override
   State<BookingPage> createState() => _BookingPageState();
 }
 
 class _BookingPageState extends State<BookingPage> {
+  // Hapus: final BookingService _bookingService = BookingService();
+
+  // Akses Hive Box secara langsung
+  final Box<BookingModel> _bookingBox = Hive.box<BookingModel>('bookingBox');
+
   // --- Data Dummy Internal untuk Visual Frontend ---
-  final String _lapanganNamaDummy = 'Lapangan Fantastis A';
-  final int _pricePerHour = 1250000;
   final List<String> _availableTimes = [
     '08:00', '09:00', '10:00', '11:00', '12:00',
     '13:00', '14:00', '15:00', '16:00', '17:00',
     '18:00', '19:00', '20:00', '21:00', '22:00'
   ];
   final List<String> _bookedTimes = ['10:00', '18:00', '19:00'];
-
+  
   // --- State untuk Interaksi ---
   DateTime _selectedDay = DateTime.now();
   DateTime _focusedDay = DateTime.now();
@@ -31,39 +40,118 @@ class _BookingPageState extends State<BookingPage> {
   int _bookingDurationHours = 1;
   final int _maxBookingDurationHours = 4;
 
+  // Nilai dinamis
+  late String _lapanganNama;
+  late String _lapanganJenis;
+  late int _pricePerHour;
+  
+  // Hitungan Total
+  late int _totalPrice;
 
   @override
   void initState() {
     super.initState();
-    // Pastikan locale Indonesia dimuat sebelum memakai DateFormat
+    _lapanganNama = widget.tempat.namaTempat;
+    _lapanganJenis = widget.tempat.jenisLapangan;
+    _pricePerHour = widget.tempat.hargaSewa;
+
+    _totalPrice = _pricePerHour * _bookingDurationHours;
+    
     Intl.defaultLocale = 'id_ID';
     initializeDateFormatting('id_ID').then((_) {
-      setState(() {}); // trigger rebuild kalau perlu
+      setState(() {});
     });
+  }
+  
+  void _updateTotalHarga() {
+    setState(() {
+      _totalPrice = _pricePerHour * _bookingDurationHours;
+    });
+  }
+
+  // --- Fungsi untuk Menyimpan Booking ke Hive (Tanpa Service) ---
+  void _saveBookingToHive() async {
+    if (_selectedTime == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Mohon pilih jam mulai terlebih dahulu.')),
+      );
+      return;
+    }
+    
+    // 1. Buat objek BookingModel
+    final newBooking = BookingModel(
+      namaLapangan: _lapanganNama,
+      jenisLapangan: _lapanganJenis,
+      tanggalBooking: _selectedDay,
+      jamMulai: _selectedTime!,
+      durasiJam: _bookingDurationHours,
+      totalHarga: _totalPrice,
+      statusPembayaran: "Pending",
+      // FIX: Masukkan userId dari widget ke dalam model
+      userId: widget.userId, 
+      imageUrl: widget.tempat.imageUrl,      
+    );
+    
+    try {
+      // 2. Simpan ke Hive secara LANGSUNG menggunakan Box instance
+      await _bookingBox.add(newBooking);
+      
+      // 3. Tampilkan sukses dan navigasi
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Booking berhasil disimpan! (Langsung ke Hive)')),
+        );
+        Navigator.pushReplacementNamed(context, '/booking_saya'); 
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal menyimpan booking: ${e.toString()}')),
+        );
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Pastikan locale Indonesia dimuat jika ingin menggunakan format tanggal bahasa Indonesia
+    // ... (sisa kode build tetap sama)
     Intl.defaultLocale = 'id';
     
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('Settings', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w900),), 
+        title: Text(_lapanganNama, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w900),), 
         backgroundColor: Colors.white,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Container(
             width: double.infinity,
-            padding: EdgeInsets.all(30), // Padding yang sama
+            padding: EdgeInsets.all(30),
             decoration: BoxDecoration(
               color: Colors.white,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // --- Informasi Lapangan ---
+                Text(
+                  "Jenis Lapangan: $_lapanganJenis",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                Text(
+                  "Harga per Jam: Rp ${NumberFormat.decimalPattern('id_ID').format(_pricePerHour)}",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.grey[600]
+                  ),
+                ),
+                SizedBox(height: 30),
+
                 // --- Seleksi Tanggal ---
                 Text(
                   "Pilih Tanggal Booking",
@@ -104,7 +192,6 @@ class _BookingPageState extends State<BookingPage> {
                     onPageChanged: (focusedDay) {
                       _focusedDay = focusedDay;
                     },
-                    // Kustomisasi tampilan kalender
                     headerStyle: HeaderStyle(
                       formatButtonVisible: false,
                       titleCentered: true,
@@ -131,7 +218,7 @@ class _BookingPageState extends State<BookingPage> {
 
                 // --- Seleksi Jam ---
                 Text(
-                  "Pilih Jam Mulai & Durasi",
+                  "Pilih Jam Mulai",
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
@@ -148,6 +235,7 @@ class _BookingPageState extends State<BookingPage> {
                       onTap: isBooked ? null : () {
                         setState(() {
                           _selectedTime = time;
+                          _updateTotalHarga();
                         });
                       },
                       child: Container(
@@ -198,6 +286,7 @@ class _BookingPageState extends State<BookingPage> {
                           onTap: () {
                             setState(() {
                               _bookingDurationHours = i;
+                              _updateTotalHarga();
                             });
                           },
                           child: Container(
@@ -248,13 +337,15 @@ class _BookingPageState extends State<BookingPage> {
                   ),
                   child: Column(
                     children: [
+                      _buildSummaryRow("Nama Lapangan", _lapanganNama),
+                      _buildSummaryRow("Jenis", _lapanganJenis),
                       _buildSummaryRow("Tanggal", DateFormat('EEEE, dd MMMM yyyy', 'id_ID').format(_selectedDay)),
                       _buildSummaryRow("Jam Mulai", _selectedTime ?? '-'),
                       _buildSummaryRow("Durasi", '$_bookingDurationHours jam'),
                       Divider(height: 20, thickness: 1, color: Colors.grey[200]),
                       _buildSummaryRow(
                         "Total Harga",
-                        'Rp ${NumberFormat.decimalPattern('id_ID').format(_pricePerHour * _bookingDurationHours)}',
+                        'Rp ${NumberFormat.decimalPattern('id_ID').format(_totalPrice)}',
                         isTotal: true,
                       ),
                     ],
@@ -269,8 +360,8 @@ class _BookingPageState extends State<BookingPage> {
       bottomNavigationBar: _buildBookingButton(),
     );
   }
-
-  // Helper untuk baris ringkasan
+  
+  // Helper functions (tetap sama)
   Widget _buildSummaryRow(String label, String value, {bool isTotal = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
@@ -297,8 +388,7 @@ class _BookingPageState extends State<BookingPage> {
       ),
     );
   }
-
-  // Helper untuk tombol booking
+  
   Widget _buildBookingButton() {
     bool isButtonEnabled = _selectedTime != null;
     return BottomAppBar(
@@ -309,10 +399,8 @@ class _BookingPageState extends State<BookingPage> {
         child: SizedBox(
           width: double.infinity,
           child: ElevatedButton(
-            onPressed: isButtonEnabled ? () {
-              // Hanya simulasi aksi, fokus pada visual
-              print('Simulasi Booking untuk $_lapanganNamaDummy');
-            } : null,
+            // Panggil fungsi penyimpanan langsung
+            onPressed: isButtonEnabled ? _saveBookingToHive : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: isButtonEnabled ? const Color.fromARGB(255, 0, 0, 0) : Colors.grey,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),

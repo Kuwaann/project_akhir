@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:project_akhir/components/navbar.dart';
+import '../components/navbar.dart';
+import '../services/lapangan_service.dart';
+import '../models/lapangan_model.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -9,6 +11,16 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends State<SearchPage> {
+  final LapanganService _service = LapanganService();
+  late Future<List<TempatOlahraga>> _futureLapangan;
+  String _query = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _futureLapangan = _service.fetchLapangan();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -19,58 +31,109 @@ class _SearchPageState extends State<SearchPage> {
             Container(
               width: double.infinity,
               height: double.infinity,
-              padding: EdgeInsets.symmetric(horizontal: 30),
+              padding: const EdgeInsets.symmetric(horizontal: 30),
               child: ScrollConfiguration(
                 behavior: ScrollConfiguration.of(context).copyWith(
-                  scrollbars: false, // ⛔ sembunyikan scrollbar
-                  overscroll: false, // opsional: hilangkan efek glow
+                  scrollbars: false,
+                  overscroll: false,
                 ),
                 child: SingleChildScrollView(
                   child: Column(
                     children: [
-                      SizedBox(height: 50),
+                      const SizedBox(height: 50),
+
+                      // 🔍 TextField untuk pencarian
                       TextField(
+                        onChanged: (value) {
+                          setState(() => _query = value.toLowerCase());
+                        },
                         decoration: InputDecoration(
                           filled: true,
-                          fillColor: Color.fromARGB(255, 252, 252, 252),
+                          fillColor: const Color.fromARGB(255, 252, 252, 252),
                           hintText: 'Cari lapangan...',
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(30),
                             borderSide: const BorderSide(
-                              color: Color.fromARGB(255, 238, 238, 238), 
+                              color: Color.fromARGB(255, 238, 238, 238),
                               width: 1,
                             ),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(30),
                             borderSide: const BorderSide(
-                              color: Color.fromARGB(255, 238, 238, 238), 
+                              color: Color.fromARGB(255, 238, 238, 238),
                               width: 1,
                             ),
                           ),
                         ),
                       ),
-                      SizedBox(height: 30),
-                      ItemLapangan(),
-                      SizedBox(height: 120),
+
+                      const SizedBox(height: 30),
+
+                      // 🏟️ FutureBuilder ambil data dari API GitHub
+                      FutureBuilder<List<TempatOlahraga>>(
+                        future: _futureLapangan,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return const Padding(
+                              padding: EdgeInsets.only(top: 100),
+                              child: Center(child: CircularProgressIndicator()),
+                            );
+                          } else if (snapshot.hasError) {
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 100),
+                              child: Text(
+                                '❌ Gagal memuat data: ${snapshot.error}',
+                                textAlign: TextAlign.center,
+                              ),
+                            );
+                          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                            return const Padding(
+                              padding: EdgeInsets.only(top: 100),
+                              child: Text('Tidak ada data lapangan.'),
+                            );
+                          }
+
+                          final filtered = snapshot.data!
+                              .where((lap) =>
+                                  lap.namaTempat.toLowerCase().contains(_query) ||
+                                  lap.jenisLapangan.toLowerCase().contains(_query) ||
+                                  lap.lokasiWilayah.toLowerCase().contains(_query))
+                              .toList();
+
+                          return Column(
+                            children: filtered
+                                .map((lap) => Padding(
+                                      padding: const EdgeInsets.only(bottom: 20),
+                                      child: ItemLapangan(lapangan: lap),
+                                    ))
+                                .toList(),
+                          );
+                        },
+                      ),
+
+                      const SizedBox(height: 120),
                     ],
                   ),
                 ),
-              )
-              
+              ),
             ),
-            Navbar()
+
+            // 🧭 Navbar bawah
+            const Navbar(),
           ],
         ),
-      )
+      ),
     );
   }
 }
 
+// ==========================================================
+// 🧱 ITEM LAPANGAN — menampilkan satu data lapangan
+// ==========================================================
 class ItemLapangan extends StatelessWidget {
-  const ItemLapangan({
-    super.key,
-  });
+  final TempatOlahraga lapangan;
+  const ItemLapangan({super.key, required this.lapangan});
 
   @override
   Widget build(BuildContext context) {
@@ -80,84 +143,93 @@ class ItemLapangan extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(15),
         border: Border.all(
-          color: Color.fromARGB(255, 238, 238, 238), 
+          color: const Color.fromARGB(255, 238, 238, 238),
           width: 1,
         ),
         color: Colors.white,
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(15),
-        onTap:() {
-          Navigator.pushNamed(context, '/detail_lapangan');
+        onTap: () {
+          Navigator.pushNamed(context, '/detail_lapangan', arguments: lapangan);
         },
         child: Row(
           children: [
+            // 🖼️ Gambar dari URL API
             Expanded(
               flex: 2,
               child: ClipRRect(
-                borderRadius: BorderRadius.only(topLeft: Radius.circular(15), bottomLeft: Radius.circular(15)),
-                child: Container(
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(15),
+                  bottomLeft: Radius.circular(15),
+                ),
+                child: Image.network(
+                  lapangan.imageUrl,
                   width: double.infinity,
                   height: double.infinity,
-                  child: Image.asset('assets/images/contohlapangan.jpg', fit: BoxFit.cover)
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) =>
+                      const Icon(Icons.broken_image, size: 40),
                 ),
-              )
+              ),
             ),
+
+            // 📋 Detail lapangan
             Expanded(
               flex: 3,
               child: Padding(
-                padding: EdgeInsets.all(15),
+                padding: const EdgeInsets.all(15),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Lapangan ABCD",
-                          style: TextStyle(
+                          lapangan.namaTempat,
+                          style: const TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w800,
-                          )
+                          ),
                         ),
                         Row(
                           children: [
-                            Icon(Icons.sports_soccer, color: Colors.black, size: 16),
-                            SizedBox(width: 5),
-                            Text("Mini Soccer"),
+                            const Icon(Icons.sports_soccer,
+                                color: Colors.black, size: 16),
+                            const SizedBox(width: 5),
+                            Text(lapangan.jenisLapangan),
                           ],
                         ),
                         Row(
                           children: [
-                            Icon(Icons.location_city, color: Colors.black, size: 16),
-                            SizedBox(width: 5),
-                            Text("Jakarta Pusat"),
+                            const Icon(Icons.location_city,
+                                color: Colors.black, size: 16),
+                            const SizedBox(width: 5),
+                            Text(lapangan.lokasiWilayah),
                           ],
                         ),
                         Row(
                           children: [
-                            Text("4,5"),
-                            SizedBox(width: 5),
-                            Icon(Icons.star, color: Colors.amber, size: 16),
-                            Icon(Icons.star, color: Colors.amber, size: 16),
-                            Icon(Icons.star, color: Colors.amber, size: 16),
-                            Icon(Icons.star, color: Colors.amber, size: 16),
-                            Icon(Icons.star_half, color: Colors.amber, size: 16),
+                            Text(lapangan.ratingAvg.toStringAsFixed(1)),
+                            const SizedBox(width: 5),
+                            const Icon(Icons.star,
+                                color: Colors.amber, size: 16),
                           ],
-                        )
+                        ),
                       ],
                     ),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Icon(Icons.price_change_rounded, color: Colors.black, size:16),
-                        SizedBox(width: 5),
-                        Expanded(child: Text("Rp600.000", style: TextStyle(fontSize: 12)))
+                        const Icon(Icons.price_change_rounded,
+                            color: Colors.black, size: 16),
+                        const SizedBox(width: 5),
+                        Text(
+                          "Rp${lapangan.hargaSewa.toString()}",
+                          style: const TextStyle(fontSize: 12),
+                        ),
                       ],
-                    )
+                    ),
                   ],
                 ),
               ),

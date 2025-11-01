@@ -8,14 +8,17 @@ import 'package:project_akhir/views/book_detail.dart';
 import 'package:project_akhir/views/booking_page.dart';
 import 'package:project_akhir/views/home_page.dart';
 import 'package:project_akhir/views/jadwal_saya.dart';
+import 'package:project_akhir/views/konversi_zonawaktu_page.dart';
 import 'package:project_akhir/views/lapangan_detail.dart';
 import 'package:project_akhir/views/login_page.dart';
 import 'package:project_akhir/views/register_page.dart';
+import 'package:project_akhir/views/sarankesan_page.dart';
 import 'package:project_akhir/views/search_page.dart';
 import 'package:project_akhir/views/settings_page.dart';
 import 'package:project_akhir/views/welcome_page.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'models/lapangan_model.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,9 +28,11 @@ void main() async {
 
   // 2. Registrasi adapter
   Hive.registerAdapter(UserModelAdapter());
+  // Hive.registerAdapter(TempatOlahragaAdapter());
 
   // 3. Buka semua box yang akan digunakan
   await Hive.openBox<UserModel>('userBox');
+  // await Hive.openBox<TempatOlahraga>('lapanganBox');
   await Hive.openBox('sessionBox');
 
   await Supabase.initialize(
@@ -58,6 +63,8 @@ class MyApp extends StatelessWidget {
         '/booking_saya': (context) => BookingSayaPage(),
         '/detail_book': (context) => BookDetail(),
         '/booking': (context) => BookingPage(),
+        '/sarankesan' : (context) => SaranKesanPage(),
+        '/zonawaktu' : (context) => KonversiZonaWaktuPage(),
       },
       initialRoute: '/',
     );

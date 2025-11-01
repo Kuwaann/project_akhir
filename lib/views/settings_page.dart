@@ -47,7 +47,9 @@ class _SettingsPageState extends State<SettingsPage> {
                   ListTile(
                     leading: Icon(Icons.message, color: Colors.black, size: 16),
                     title: Text('Saran & Kesan', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w900),), 
-                    onTap: (){}
+                    onTap: (){
+                      Navigator.pushNamed(context, '/sarankesan');
+                    }
                   ),
                   Container(
                     width: double.infinity,
@@ -63,7 +65,9 @@ class _SettingsPageState extends State<SettingsPage> {
                   ListTile(
                     leading: Icon(Icons.alarm, color: Colors.black, size: 16),
                     title: Text('Zona Waktu', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w900),), 
-                    onTap: (){}
+                    onTap: (){
+                      Navigator.pushReplacementNamed(context, '/zonawaktu');
+                    }
                   ),
                   Container(
                     width: double.infinity,

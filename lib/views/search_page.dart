@@ -42,7 +42,6 @@ class _SearchPageState extends State<SearchPage> {
                     children: [
                       const SizedBox(height: 50),
 
-                      // 🔍 TextField untuk pencarian
                       TextField(
                         onChanged: (value) {
                           setState(() => _query = value.toLowerCase());
@@ -70,7 +69,6 @@ class _SearchPageState extends State<SearchPage> {
 
                       const SizedBox(height: 30),
 
-                      // 🏟️ FutureBuilder ambil data dari API GitHub
                       FutureBuilder<List<TempatOlahraga>>(
                         future: _futureLapangan,
                         builder: (context, snapshot) {
@@ -119,7 +117,6 @@ class _SearchPageState extends State<SearchPage> {
               ),
             ),
 
-            // 🧭 Navbar bawah
             const Navbar(),
           ],
         ),
@@ -128,9 +125,6 @@ class _SearchPageState extends State<SearchPage> {
   }
 }
 
-// ==========================================================
-// 🧱 ITEM LAPANGAN — menampilkan satu data lapangan
-// ==========================================================
 class ItemLapangan extends StatelessWidget {
   final TempatOlahraga lapangan;
   const ItemLapangan({super.key, required this.lapangan});
@@ -155,7 +149,6 @@ class ItemLapangan extends StatelessWidget {
         },
         child: Row(
           children: [
-            // 🖼️ Gambar dari URL API
             Expanded(
               flex: 2,
               child: ClipRRect(
@@ -174,7 +167,6 @@ class ItemLapangan extends StatelessWidget {
               ),
             ),
 
-            // 📋 Detail lapangan
             Expanded(
               flex: 3,
               child: Padding(
@@ -202,11 +194,12 @@ class ItemLapangan extends StatelessWidget {
                           ],
                         ),
                         Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Icon(Icons.location_city,
                                 color: Colors.black, size: 16),
                             const SizedBox(width: 5),
-                            Text(lapangan.lokasiWilayah),
+                            Expanded(child: Text(lapangan.lokasiWilayah)),
                           ],
                         ),
                         Row(

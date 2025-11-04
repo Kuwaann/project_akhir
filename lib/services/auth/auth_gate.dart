@@ -12,42 +12,32 @@ class AuthGate extends StatefulWidget {
 }
 
 class _AuthGateState extends State<AuthGate> {
-  final AuthService _authService = AuthService();
+  final authService = AuthService();
 
   @override
   Widget build(BuildContext context) {
-    // Memantau status autentikasi dari Supabase
     return StreamBuilder<AuthState>(
       stream: Supabase.instance.client.auth.onAuthStateChange,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
+              body: Center(child: CircularProgressIndicator()));
         }
 
-        final session = snapshot.hasData ? snapshot.data!.session : null;
-
+        final session = snapshot.data?.session;
         if (session != null) {
-          // Jika ada sesi Supabase (User terautentikasi),
-          // jalankan proses sinkronisasi sesi lokal (Hive).
+          // Sinkronisasi data lokal sebelum HomePage
           return FutureBuilder(
-            // 🚀 PERBAIKAN: syncLocalSession() dipanggil tanpa argumen email
-            future: _authService.syncLocalSession(), 
-            builder: (context, syncSnapshot) {
-              if (syncSnapshot.connectionState == ConnectionState.waiting) {
-                // Tampilkan loading saat Hive sedang disinkronisasi
+            future: authService.syncLocalSession(),
+            builder: (context, snap) {
+              if (snap.connectionState == ConnectionState.waiting) {
                 return const Scaffold(
-                  body: Center(child: CircularProgressIndicator()),
-                );
+                    body: Center(child: CircularProgressIndicator()));
               }
-              
-              // Setelah sinkronisasi selesai, user bisa masuk ke HomePage
               return const HomePage();
             },
           );
         } else {
-          // Jika tidak ada sesi Supabase, arahkan ke WelcomePage untuk Login/Register
           return const WelcomePage();
         }
       },

@@ -13,23 +13,28 @@ class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  void login() async{
-    final email = _emailController.text;
-    final password = _passwordController.text;
+  void login() async {
+    try {
+      await authService.signInWithEmailPassword(
+        _emailController.text.trim(),
+        _passwordController.text,
+      );
 
-    try{
-      await authService.signInWithEmailPassword(email, password);
+      final user = authService.getCurrentUser();
+      if (user != null && mounted) {
+        Navigator.pushReplacementNamed(context, '/home');
+      } else if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Gagal login, coba lagi")));
+      }
+    } catch (e) {
       if (mounted) {
-      Navigator.pushReplacementNamed(context, '/home');
-    }
-    }
-
-    catch(e){
-      if(mounted){
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Errors: $e")));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text("Error: $e")));
       }
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +85,7 @@ class _LoginPageState extends State<LoginPage> {
                     controller: _emailController,
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: Color.fromARGB(255, 252, 252, 252),
+                      fillColor: Colors.transparent,
                       labelText: "Email",
                       border: UnderlineInputBorder(
                           borderRadius: BorderRadius.circular(0),
@@ -94,11 +99,8 @@ class _LoginPageState extends State<LoginPage> {
                       obscureText: true,
                       decoration: InputDecoration(
                         filled: true,
-                        fillColor: Color.fromARGB(255, 252, 252, 252),
+                        fillColor: Colors.transparent,
                         labelText: "Password",
-                        border: UnderlineInputBorder(
-                          borderRadius: BorderRadius.circular(0),
-                        )
                       ),
                     ),
                   ),
@@ -134,6 +136,7 @@ class _LoginPageState extends State<LoginPage> {
                         child: Text(" Daftar di sini.", 
                           style: TextStyle(
                             fontWeight: FontWeight.w800,
+                            color: Colors.blue
                           ),
                         )
                       )

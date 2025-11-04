@@ -7,11 +7,45 @@ class BookDetail extends StatelessWidget {
 
   const BookDetail({super.key, required this.booking});
 
+  // Fungsi helper untuk konversi dari WIB ke zona lain
+  String convertFromWIB(DateTime dateTime, int offsetHours) {
+    DateTime converted = dateTime.add(Duration(hours: offsetHours));
+    return '${converted.hour.toString().padLeft(2, '0')}:${converted.minute.toString().padLeft(2, '0')}';
+  }
+
+  // Fungsi helper untuk konversi harga ke mata uang lain
+  String convertCurrency(double amount, String currencyCode, {double rate = 1}) {
+    final format = NumberFormat.currency(locale: 'en_US', symbol: currencyCode);
+    return format.format(amount * rate);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final dateFormatter = DateFormat('dd/MM/yyyy HH:mm', 'id_ID');
-    final tanggalMain =
-        DateFormat('dd/MM/yyyy', 'id_ID').format(booking.tanggalBooking);
+    final dateFormatter = DateFormat('dd/MM/yyyy', 'id_ID');
+    final tanggalMain = dateFormatter.format(booking.tanggalBooking);
+
+    // Parsing jam mulai WIB
+    final hourMinute = booking.jamMulai.split(':');
+    final int jam = int.tryParse(hourMinute[0]) ?? 0;
+    final int menit = int.tryParse(hourMinute[1]) ?? 0;
+
+    // Waktu mulai dalam DateTime WIB
+    final bookingWIB = DateTime(
+      booking.tanggalBooking.year,
+      booking.tanggalBooking.month,
+      booking.tanggalBooking.day,
+      jam,
+      menit,
+    );
+
+    // Konversi ke beberapa zona
+    final wita = convertFromWIB(bookingWIB, 1); // WITA = WIB +1
+    final wit = convertFromWIB(bookingWIB, 2);  // WIT = WIB +2
+    final london = convertFromWIB(bookingWIB, -7); // London = WIB -7
+
+    // Konversi mata uang (contoh kurs)
+    const double usdRate = 0.000067; // 1 IDR ≈ 0.000067 USD
+    const double eurRate = 0.000061; // 1 IDR ≈ 0.000061 EUR
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -21,6 +55,8 @@ class BookDetail extends StatelessWidget {
           style: TextStyle(fontSize: 15, fontWeight: FontWeight.w900),
         ),
         backgroundColor: Colors.white,
+        iconTheme: const IconThemeData(color: Colors.black),
+        elevation: 0,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -51,28 +87,10 @@ class BookDetail extends StatelessWidget {
                               color: Colors.grey,
                             ),
                           )
-                        : Image.network(
-                            // fallback gambar berdasarkan jenis lapangan
-                            booking.jenisLapangan.contains('Basket')
-                                ? 'https://images.unsplash.com/photo-1519861155730-0b5b0bf7ce19'
-                                : booking.jenisLapangan.contains('Badminton')
-                                    ? 'https://images.unsplash.com/photo-1505664194779-8beaceb93744'
-                                    : booking.jenisLapangan.contains('Volley')
-                                        ? 'https://images.unsplash.com/photo-1509822929063-6b6cfc9b42f2'
-                                        : booking.jenisLapangan
-                                                .contains('Mini Soccer')
-                                            ? 'https://images.unsplash.com/photo-1603031976405-27b8bbff3a3d'
-                                            : booking.jenisLapangan
-                                                    .contains('Soccer')
-                                                ? 'https://images.unsplash.com/photo-1508261305430-3b38e3b54a56'
-                                                : 'https://images.unsplash.com/photo-1599058917212-d750089bc07c',
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
-                                const Icon(
-                              Icons.image_not_supported,
-                              size: 50,
-                              color: Colors.grey,
-                            ),
+                        : const Icon(
+                            Icons.image_not_supported,
+                            size: 50,
+                            color: Colors.grey,
                           ),
                   ),
                 ),
@@ -110,13 +128,23 @@ class BookDetail extends StatelessWidget {
                         ),
                         child: Column(
                           children: [
-                            _buildRow(
-                                "ID Booking", "#${booking.key ?? 'N/A'}"),
+                            _buildRow("ID Booking", "#${booking.key ?? 'N/A'}"),
                             _buildRow("Tanggal Booking",
-                                dateFormatter.format(booking.tanggalBooking)),
+                                DateFormat('dd/MM/yyyy HH:mm', 'id_ID')
+                                    .format(booking.tanggalBooking)),
                             _buildRow("Tanggal Main", tanggalMain),
-                            _buildRow("Jam Main",
-                                "${booking.jamMulai} - ${booking.jamSelesai} WIB"),
+                            const SizedBox(height: 10),
+                            const Text(
+                              "Jam Main di Berbagai Zona Waktu",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w600, fontSize: 15),
+                            ),
+                            const SizedBox(height: 5),
+                            _buildRow("WIB", booking.jamMulai),
+                            _buildRow("WITA", wita),
+                            _buildRow("WIT", wit),
+                            _buildRow("London (GMT)", london),
+                            const SizedBox(height: 10),
                             _buildRow("Jenis Lapangan", booking.jenisLapangan),
                           ],
                         ),
@@ -139,12 +167,27 @@ class BookDetail extends StatelessWidget {
                           borderRadius: BorderRadius.circular(15),
                         ),
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            const Text(
+                              "Total Pembayaran:",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 15),
+                            ),
+                            const SizedBox(height: 5),
                             _buildRow(
-                              "Total Pembayaran",
+                              "IDR",
                               NumberFormat.currency(
                                       locale: 'id_ID', symbol: 'Rp')
                                   .format(booking.totalHarga),
+                            ),
+                            _buildRow(
+                              "USD",
+                              convertCurrency(booking.totalHarga.toDouble(), "\$", rate: usdRate),
+                            ),
+                            _buildRow(
+                              "EUR",
+                              convertCurrency(booking.totalHarga.toDouble(), "€", rate: eurRate),
                             ),
                             const SizedBox(height: 5),
                             Row(
@@ -188,7 +231,6 @@ class BookDetail extends StatelessWidget {
     );
   }
 
-  // Widget helper untuk baris teks kiri-kanan
   Widget _buildRow(String left, String right) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
@@ -210,7 +252,6 @@ class BookDetail extends StatelessWidget {
     );
   }
 
-  // Fungsi untuk menentukan warna status pembayaran
   Color _getStatusColor(String status) {
     switch (status) {
       case 'Pending':

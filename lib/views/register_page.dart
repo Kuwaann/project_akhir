@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:project_akhir/services/auth/auth_service.dart';
-import 'package:supabase_flutter/supabase_flutter.dart'; // Penting: Import Supabase untuk AuthResponse
+import 'package:supabase_flutter/supabase_flutter.dart'; 
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -10,10 +10,8 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  // Instance AuthService harus diinisialisasi
   final authService = AuthService(); 
   
-  // Controllers
   final _emailController = TextEditingController();
   final _namaDepanController = TextEditingController();
   final _namaBelakangController = TextEditingController();
@@ -21,7 +19,6 @@ class _RegisterPageState extends State<RegisterPage> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   
-  // State untuk Loading
   bool _isLoading = false;
 
   @override
@@ -47,7 +44,6 @@ class _RegisterPageState extends State<RegisterPage> {
     final password = _passwordController.text;
     final confirmPassword = _confirmPasswordController.text;
     
-    // 1. Validasi Input
     if (email.isEmpty || namaDepan.isEmpty || username.isEmpty || password.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -58,7 +54,6 @@ class _RegisterPageState extends State<RegisterPage> {
       return; 
     }
 
-    // 2. Validasi Konfirmasi Password
     if (password != confirmPassword) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -70,37 +65,31 @@ class _RegisterPageState extends State<RegisterPage> {
     }
 
     try {
-      // 3. SIGN UP KE SUPABASE
       final AuthResponse response = await authService.signUpWithEmailPassword(
         email,
         password,
       );
 
-      // 4. Ambil Supabase UID dari response
       final String? uid = response.user?.id;
       
       if (uid == null) {
-        // Handle error jika user ID tidak ditemukan setelah sign up berhasil
-        // FIX: AuthResponse tidak memiliki getter 'error'. Langsung lempar AuthException.
-        throw const AuthException('Gagal mendapatkan ID pengguna dari Supabase. Coba periksa koneksi atau detail pendaftaran.');
+        throw const AuthException('Gagal mendapatkan ID pengguna dari Supabase.');
       }
       
-      // 5. SIMPAN DATA PENGGUNA DENGAN UID SUPABASE
       await authService.saveUserDataLocally(
-        uid: uid, // <-- Meneruskan UID Supabase
+        uid: uid,
         firstName: namaDepan,
         lastName: namaBelakang,
         username: username,
         email: email,
       );
 
+      await authService.signInWithEmailPassword(email, password);
+
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text("Registrasi berhasil. Silakan masuk.")));
-        // Kembali ke halaman login
-        Navigator.pop(context); 
+        Navigator.pushReplacementNamed(context, '/home');
       }
+
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(
@@ -133,7 +122,6 @@ class _RegisterPageState extends State<RegisterPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Judul dan Subjudul
               const SizedBox(
                 width: double.infinity,
                 child: Column(
@@ -162,10 +150,8 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               const SizedBox(height: 50),
               
-              // Form Input
               Column(
                 children: [
-                  // Nama Depan dan Belakang
                   Row(
                     children: [
                       Expanded(
@@ -175,13 +161,13 @@ class _RegisterPageState extends State<RegisterPage> {
                             filled: true,
                             fillColor: const Color.fromARGB(255, 252, 252, 252),
                             labelText: "Nama Depan",
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
+                            border: UnderlineInputBorder(
+                              borderRadius: BorderRadius.circular(15),
                             ),
                           ),
                         ),
                       ),
-                      const SizedBox(width: 20), // Spasi antar field
+                      const SizedBox(width: 20),
                       Expanded(
                         child: TextFormField(
                           controller: _namaBelakangController,
@@ -189,8 +175,8 @@ class _RegisterPageState extends State<RegisterPage> {
                             filled: true,
                             fillColor: const Color.fromARGB(255, 252, 252, 252),
                             labelText: "Nama Belakang",
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
+                            border: UnderlineInputBorder(
+                              borderRadius: BorderRadius.circular(15),
                             ),
                           ),
                         ),
@@ -199,21 +185,19 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                   const SizedBox(height: 20),
                   
-                  // Username
                   TextFormField(
                     controller: _usernameController,
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: const Color.fromARGB(255, 252, 252, 252),
                       labelText: "Username",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                      border: UnderlineInputBorder(
+                        borderRadius: BorderRadius.circular(0),
                       ),
                     ),
                   ),
                   const SizedBox(height: 20),
                   
-                  // Email
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
@@ -221,14 +205,13 @@ class _RegisterPageState extends State<RegisterPage> {
                       filled: true,
                       fillColor: const Color.fromARGB(255, 252, 252, 252),
                       labelText: "Email",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                      border: UnderlineInputBorder(
+                        borderRadius: BorderRadius.circular(0),
                       ),
                     ),
                   ),
                   const SizedBox(height: 20),
                   
-                  // Password
                   TextFormField(
                     controller: _passwordController,
                     obscureText: true,
@@ -236,14 +219,13 @@ class _RegisterPageState extends State<RegisterPage> {
                       filled: true,
                       fillColor: const Color.fromARGB(255, 252, 252, 252),
                       labelText: "Password",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                      border: UnderlineInputBorder(
+                        borderRadius: BorderRadius.circular(0),
                       ),
                     ),
                   ),
                   const SizedBox(height: 20),
                   
-                  // Confirm Password
                   TextFormField(
                     controller: _confirmPasswordController,
                     obscureText: true,
@@ -251,26 +233,23 @@ class _RegisterPageState extends State<RegisterPage> {
                       filled: true,
                       fillColor: const Color.fromARGB(255, 252, 252, 252),
                       labelText: "Konfirmasi Password",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                      border: UnderlineInputBorder(
+                        borderRadius: BorderRadius.circular(0),
                       ),
                     ),
                   ),
                   
                   const SizedBox(height: 40),
                   
-                  // Tombol Sign Up
                   SizedBox(
                     width: double.infinity,
-                    height: 50, 
+                    height: 40, 
                     child: ElevatedButton(
-                      onPressed: _isLoading ? null : register, // Disabled saat loading
+                      onPressed: _isLoading ? null : register, 
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color.fromARGB(255, 0, 0, 0),
-                        elevation: 5,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
+                        elevation: 0,
+                        shadowColor: Colors.transparent,
                       ),
                       child: _isLoading
                           ? const CircularProgressIndicator(color: Colors.white)
@@ -279,7 +258,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               style: TextStyle(
                                 color: Color.fromARGB(255, 255, 255, 255),
                                 fontWeight: FontWeight.w800,
-                                fontSize: 18,
+                                fontSize: 15,
                               ),
                             ),
                     ),
@@ -287,15 +266,13 @@ class _RegisterPageState extends State<RegisterPage> {
                   
                   const SizedBox(height: 20),
                   
-                  // Link ke Halaman Login
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Text("Sudah punya akun?"),
                       GestureDetector(
                         onTap: () {
-                          // Gunakan pop untuk kembali ke halaman sebelumnya (Login)
-                          Navigator.pop(context); 
+                          Navigator.pushNamed(context,'/login'); 
                         },
                         child: const Text(
                           " Masuk di sini.",

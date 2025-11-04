@@ -31,7 +31,9 @@ class _SettingsPageState extends State<SettingsPage> {
                   ListTile(
                     leading: Icon(Icons.person, color: Colors.black, size: 16),
                     title: Text('Akun', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w900),), 
-                    onTap: (){}
+                    onTap: (){
+                      Navigator.pushNamed(context,'/profil');
+                    }
                   ),
                   Container(
                     width: double.infinity,
@@ -50,40 +52,6 @@ class _SettingsPageState extends State<SettingsPage> {
                     onTap: (){
                       Navigator.pushNamed(context, '/sarankesan');
                     }
-                  ),
-                  Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(
-                          color: Color.fromARGB(255, 0, 0, 0).withOpacity(0.1),
-                          width: 1,
-                        ),
-                      ),
-                    ),
-                  ),
-                  ListTile(
-                    leading: Icon(Icons.alarm, color: Colors.black, size: 16),
-                    title: Text('Zona Waktu', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w900),), 
-                    onTap: (){
-                      Navigator.pushReplacementNamed(context, '/zonawaktu');
-                    }
-                  ),
-                  Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(
-                          color: Color.fromARGB(255, 0, 0, 0).withOpacity(0.1),
-                          width: 1,
-                        ),
-                      ),
-                    ),
-                  ),
-                  ListTile(
-                    leading: Icon(Icons.monetization_on_outlined, color: Colors.black, size: 16),
-                    title: Text('Mata Uang', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w900),), 
-                    onTap: (){}
                   ),
                   Container(
                     width: double.infinity,

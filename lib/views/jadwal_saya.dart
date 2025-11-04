@@ -4,19 +4,6 @@ import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import '../models/booking_model.dart';
 
-// Mocking the imported Navbar component
-class Navbar extends StatelessWidget {
-  const Navbar({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return BottomAppBar(
-      color: Colors.white,
-      child: Container(height: 50, color: Colors.transparent),
-    );
-  }
-}
-
 class BookingSayaPage extends StatefulWidget {
   final String userId;
   const BookingSayaPage({super.key, required this.userId});
@@ -27,6 +14,7 @@ class BookingSayaPage extends StatefulWidget {
 
 class _BookingSayaPageState extends State<BookingSayaPage> {
   late final Box<BookingModel> _bookingBox;
+  String _searchQuery = ''; 
 
   @override
   void initState() {
@@ -69,7 +57,6 @@ class _BookingSayaPageState extends State<BookingSayaPage> {
             ],
           ),
         ),
-        bottomNavigationBar: const Navbar(),
       ),
     );
   }
@@ -80,12 +67,11 @@ class _BookingSayaPageState extends State<BookingSayaPage> {
       builder: (context, box, child) {
         final allBookings = box.values.toList();
         final filteredBookings = allBookings
-            .where((b) => b.userId == widget.userId)
-            .where((b) => b.bookingType == tabType)
-            .toList();
-
-        filteredBookings.sort(
-            (a, b) => b.tanggalBooking.compareTo(a.tanggalBooking));
+          .where((b) => b.userId == widget.userId)
+          .where((b) => b.bookingType == tabType)
+          .where((b) =>
+              (b.namaLapangan ?? '').toLowerCase().contains(_searchQuery.toLowerCase()))
+          .toList();
 
         return ScrollConfiguration(
           behavior: ScrollConfiguration.of(context).copyWith(
@@ -97,22 +83,22 @@ class _BookingSayaPageState extends State<BookingSayaPage> {
             child: Column(
               children: [
                 const SizedBox(height: 20),
-                const TextField(
+                TextField(
                   decoration: InputDecoration(
                     filled: true,
-                    fillColor: Color.fromARGB(255, 252, 252, 252),
+                    fillColor: const Color.fromARGB(255, 252, 252, 252),
                     hintText: 'Cari lapangan...',
-                    prefixIcon: Icon(Icons.search, color: Colors.grey),
+                    prefixIcon: const Icon(Icons.search, color: Colors.grey),
                     contentPadding:
-                        EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
-                    enabledBorder: OutlineInputBorder(
+                        const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                    enabledBorder: const OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(30)),
                       borderSide: BorderSide(
                         color: Color.fromARGB(255, 238, 238, 238),
                         width: 1,
                       ),
                     ),
-                    focusedBorder: OutlineInputBorder(
+                    focusedBorder: const OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(30)),
                       borderSide: BorderSide(
                         color: Color.fromARGB(255, 150, 150, 150),
@@ -120,6 +106,11 @@ class _BookingSayaPageState extends State<BookingSayaPage> {
                       ),
                     ),
                   ),
+                  onChanged: (value) {
+                    setState(() {
+                      _searchQuery = value;
+                    });
+                  },
                 ),
                 const SizedBox(height: 30),
 
@@ -131,8 +122,7 @@ class _BookingSayaPageState extends State<BookingSayaPage> {
                         tabType == 'Aktif'
                             ? 'Anda belum memiliki booking yang aktif saat ini.'
                             : 'Belum ada riwayat booking untuk akun ini.',
-                        style:
-                            TextStyle(color: Colors.grey[600], fontSize: 16),
+                        style: TextStyle(color: Colors.grey[600], fontSize: 16),
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -157,7 +147,6 @@ class _BookingSayaPageState extends State<BookingSayaPage> {
   }
 }
 
-// --- ItemLapangan (Booking Card)
 class ItemLapangan extends StatelessWidget {
   final BookingModel booking;
 
@@ -197,6 +186,7 @@ class ItemLapangan extends StatelessWidget {
 
     return Ink(
       width: double.infinity,
+      height: 150,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(15),
         border: Border.all(
@@ -234,6 +224,7 @@ class ItemLapangan extends StatelessWidget {
                 child: booking.imageUrl.isNotEmpty
                     ? Image.network(
                         booking.imageUrl,
+                        height: double.infinity,
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {
                           return Container(

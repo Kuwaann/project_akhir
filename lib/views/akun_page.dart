@@ -1,27 +1,29 @@
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import '../models/user_model.dart';
+import 'package:project_akhir/models/user_model.dart';
+import 'package:project_akhir/services/auth/auth_service.dart'; // pastikan path sesuai
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final userBox = Hive.box<UserModel>('userBox');
-    final user = userBox.get('currentUser'); // atau pakai key lain sesuai implementasi kamu
+    final AuthService _authService = AuthService();
+    final UserModel? user = _authService.getCurrentUser();
 
     // URL foto profil statis
     const profileImageUrl =
-        'https://images.unsplash.com/photo-1502685104226-ee32379fefbe'; // contoh avatar dari Unsplash
+        'https://images.unsplash.com/photo-1502685104226-ee32379fefbe';
 
     if (user == null) {
       return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          title: const Text("Profil"),
-          backgroundColor: Colors.white,
-          elevation: 0,
+        title: const Text(
+          'Profil',
+          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w900),
         ),
+        backgroundColor: Colors.white,
+      ),
         body: const Center(child: Text('Data pengguna tidak ditemukan')),
       );
     }
@@ -30,12 +32,10 @@ class ProfilePage extends StatelessWidget {
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text(
-          "Profil Saya",
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+          'Profil',
+          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w900),
         ),
-        centerTitle: true,
         backgroundColor: Colors.white,
-        elevation: 0,
       ),
       body: SafeArea(
         child: Padding(
@@ -92,24 +92,6 @@ class ProfilePage extends StatelessWidget {
               ),
 
               const SizedBox(height: 30),
-
-              // Tombol Edit (opsional)
-              ElevatedButton(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Fitur edit profil belum tersedia')),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                ),
-                child: const Text("Edit Profil"),
-              ),
             ],
           ),
         ),

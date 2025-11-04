@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:hive_flutter/hive_flutter.dart'; // <--- Import Hive
+import 'package:hive_flutter/hive_flutter.dart'; 
+import 'package:project_akhir/services/notification_service.dart';
 import '../models/lapangan_model.dart'; 
 import '../models/booking_model.dart'; 
-// Hapus: import '../services/booking_service.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class BookingPage extends StatefulWidget {
   final TempatOlahraga tempat; 
-  // FIX: Tambahkan parameter userId yang dibutuhkan
   final String userId;
 
   const BookingPage({super.key, required this.tempat, required this.userId});
@@ -19,20 +18,15 @@ class BookingPage extends StatefulWidget {
 }
 
 class _BookingPageState extends State<BookingPage> {
-  // Hapus: final BookingService _bookingService = BookingService();
-
-  // Akses Hive Box secara langsung
   final Box<BookingModel> _bookingBox = Hive.box<BookingModel>('bookingBox');
 
-  // --- Data Dummy Internal untuk Visual Frontend ---
   final List<String> _availableTimes = [
     '08:00', '09:00', '10:00', '11:00', '12:00',
     '13:00', '14:00', '15:00', '16:00', '17:00',
     '18:00', '19:00', '20:00', '21:00', '22:00'
   ];
-  final List<String> _bookedTimes = ['10:00', '18:00', '19:00'];
+  final List<String> _bookedTimes = [];
   
-  // --- State untuk Interaksi ---
   DateTime _selectedDay = DateTime.now();
   DateTime _focusedDay = DateTime.now();
   CalendarFormat _calendarFormat = CalendarFormat.month;
@@ -40,12 +34,10 @@ class _BookingPageState extends State<BookingPage> {
   int _bookingDurationHours = 1;
   final int _maxBookingDurationHours = 4;
 
-  // Nilai dinamis
   late String _lapanganNama;
   late String _lapanganJenis;
   late int _pricePerHour;
   
-  // Hitungan Total
   late int _totalPrice;
 
   @override
@@ -69,7 +61,6 @@ class _BookingPageState extends State<BookingPage> {
     });
   }
 
-  // --- Fungsi untuk Menyimpan Booking ke Hive (Tanpa Service) ---
   void _saveBookingToHive() async {
     if (_selectedTime == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -78,7 +69,6 @@ class _BookingPageState extends State<BookingPage> {
       return;
     }
     
-    // 1. Buat objek BookingModel
     final newBooking = BookingModel(
       namaLapangan: _lapanganNama,
       jenisLapangan: _lapanganJenis,
@@ -87,16 +77,18 @@ class _BookingPageState extends State<BookingPage> {
       durasiJam: _bookingDurationHours,
       totalHarga: _totalPrice,
       statusPembayaran: "Pending",
-      // FIX: Masukkan userId dari widget ke dalam model
       userId: widget.userId, 
       imageUrl: widget.tempat.imageUrl,      
     );
     
     try {
-      // 2. Simpan ke Hive secara LANGSUNG menggunakan Box instance
       await _bookingBox.add(newBooking);
+
+      await NotificationService().showBookingNotification(
+        title: 'Booking Berhasil! 🎉',
+        body: 'Booking lapangan $_lapanganNama pada ${DateFormat('dd MMM yyyy').format(_selectedDay)} jam $_selectedTime berhasil dibuat.',
+      );
       
-      // 3. Tampilkan sukses dan navigasi
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Booking berhasil disimpan! (Langsung ke Hive)')),
@@ -114,7 +106,6 @@ class _BookingPageState extends State<BookingPage> {
 
   @override
   Widget build(BuildContext context) {
-    // ... (sisa kode build tetap sama)
     Intl.defaultLocale = 'id';
     
     return Scaffold(
@@ -134,7 +125,6 @@ class _BookingPageState extends State<BookingPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // --- Informasi Lapangan ---
                 Text(
                   "Jenis Lapangan: $_lapanganJenis",
                   style: TextStyle(
@@ -152,7 +142,6 @@ class _BookingPageState extends State<BookingPage> {
                 ),
                 SizedBox(height: 30),
 
-                // --- Seleksi Tanggal ---
                 Text(
                   "Pilih Tanggal Booking",
                   style: TextStyle(
@@ -216,7 +205,6 @@ class _BookingPageState extends State<BookingPage> {
                 ),
                 SizedBox(height: 30),
 
-                // --- Seleksi Jam ---
                 Text(
                   "Pilih Jam Mulai",
                   style: TextStyle(
@@ -268,7 +256,6 @@ class _BookingPageState extends State<BookingPage> {
                 ),
                 SizedBox(height: 30),
 
-                // --- Seleksi Durasi ---
                 Text(
                   "Durasi Booking (jam)",
                   style: TextStyle(
@@ -319,7 +306,6 @@ class _BookingPageState extends State<BookingPage> {
                 ),
                 SizedBox(height: 30),
 
-                // --- Ringkasan Booking ---
                 Text(
                   "Ringkasan Booking",
                   style: TextStyle(
@@ -356,12 +342,10 @@ class _BookingPageState extends State<BookingPage> {
           ),
         ),
       ),
-      // --- Tombol Booking di bagian bawah ---
       bottomNavigationBar: _buildBookingButton(),
     );
   }
   
-  // Helper functions (tetap sama)
   Widget _buildSummaryRow(String label, String value, {bool isTotal = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
@@ -399,7 +383,6 @@ class _BookingPageState extends State<BookingPage> {
         child: SizedBox(
           width: double.infinity,
           child: ElevatedButton(
-            // Panggil fungsi penyimpanan langsung
             onPressed: isButtonEnabled ? _saveBookingToHive : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: isButtonEnabled ? const Color.fromARGB(255, 0, 0, 0) : Colors.grey,

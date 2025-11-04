@@ -5,6 +5,7 @@ import 'package:project_akhir/models/booking_model.dart';
 import 'package:project_akhir/services/auth/auth_gate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:project_akhir/models/user_model.dart';
+import 'package:project_akhir/services/auth/auth_service.dart';
 import 'package:project_akhir/views/akun_page.dart';
 import 'package:project_akhir/views/book_detail.dart';
 import 'package:project_akhir/views/booking_page.dart';
@@ -21,6 +22,7 @@ import 'package:project_akhir/views/welcome_page.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'models/lapangan_model.dart';
+import 'services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,6 +47,8 @@ void main() async {
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtuZ3lremt0eGhmdGZ4ZXF0ZWJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE4NzgwNDgsImV4cCI6MjA3NzQ1NDA0OH0.EnxDg5Y6Se9Wy49Yamsu7j5pBCHJspXSU9MMWSp_j4o',
   );
 
+  await NotificationService().initialize();
+  
   runApp(MyApp());
 }
 

@@ -33,10 +33,11 @@ class _HomePageState extends State<HomePage> {
       body: SafeArea(
         child: Stack(
           children: [
-            SingleChildScrollView(
-              child: Container(
-                width: double.infinity,
-                padding: EdgeInsets.all(30),
+            Container(
+              width: double.infinity,
+              height: double.infinity,
+              padding: EdgeInsets.all(30),
+              child: SingleChildScrollView(
                 child: Column(
                   children: [
                     Container(
@@ -104,9 +105,9 @@ class _HomePageState extends State<HomePage> {
                     SizedBox(height: 20),
                     Container(
                       width: double.infinity,
-                      height: 250,
+                      height: 230,
                       decoration: BoxDecoration(
-                        color: Colors.black, // Background color if image fails
+                        color: Colors.black, 
                         borderRadius: BorderRadius.circular(15),
                       ),
                       child: ClipRRect(
@@ -114,18 +115,15 @@ class _HomePageState extends State<HomePage> {
                         child: Stack(
                           fit: StackFit.expand,
                           children: [
-                            // 1. Gambar
                             Image.asset(
                               'assets/images/bookingsekarang.jpg',
                               fit: BoxFit.cover,
                             ),
-                            // 2. Lapisan untuk menggelapkan gambar
                             Container(
                               decoration: BoxDecoration(
                                 color: Colors.black.withOpacity(0.3),
                               ),
                             ),
-                            // 3. Caption "Get started"
                             Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 20.0,
@@ -141,7 +139,6 @@ class _HomePageState extends State<HomePage> {
                                 ),
                               ),
                             ),
-                            // 4. Tombol di tengah-bawah
                             Align(
                               alignment: Alignment.bottomCenter,
                               child: Container(
@@ -157,7 +154,6 @@ class _HomePageState extends State<HomePage> {
                                     foregroundColor: Colors.black,
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 40,
-                                      vertical: 15,
                                     ),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(30),
@@ -227,7 +223,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
-            Navbar(),
+            const Navbar(),
           ],
         ),
       ),

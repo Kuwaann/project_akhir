@@ -27,6 +27,8 @@ class _LapanganDetailState extends State<LapanganDetail> {
       LocationPermission permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied ||
           permission == LocationPermission.deniedForever) {
+        
+        if (!mounted) return;
         setState(() => distanceInKm = -1); 
         return;
       }
@@ -42,13 +44,16 @@ class _LapanganDetailState extends State<LapanganDetail> {
         widget.tempat.longitude,
       );
 
+      if (!mounted) return;
       setState(() {
         distanceInKm = distance / 1000;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() => distanceInKm = -1);
     }
   }
+
 
   Widget _buildRatingStars(double rating) {
     int fullStars = rating.floor();
@@ -88,6 +93,7 @@ class _LapanganDetailState extends State<LapanganDetail> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        scrolledUnderElevation: 0,
         title: const Text('Detail', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w900)),
         backgroundColor: Colors.white,
         elevation: 0,
@@ -202,6 +208,30 @@ class _LapanganDetailState extends State<LapanganDetail> {
               ],
             ),
           ),
+        ),
+      ),
+      bottomNavigationBar: BottomAppBar(
+        color: Colors.transparent,
+        shadowColor: Colors.transparent,
+        child: ElevatedButton(
+            onPressed: (){
+              Navigator.pushNamed(context, '/booking', arguments: tempat);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.black,
+              foregroundColor: Colors.white,
+              shadowColor: Colors.transparent,
+              elevation: 0,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+            ),
+            child: Text(
+              'Book Sekarang',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 15,
+                fontWeight: FontWeight.w900
+              ),
+            )
         ),
       ),
     );

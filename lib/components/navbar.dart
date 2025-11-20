@@ -27,7 +27,7 @@ class _NavbarState extends State<Navbar> {
             ),
             boxShadow: [
               BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: const Color.fromARGB(255, 255, 255, 255),
                   blurRadius: 5,
                   offset: Offset(0, 1),
                 ),
@@ -41,28 +41,28 @@ class _NavbarState extends State<Navbar> {
             children: [
               IconButton(
                 onPressed: (){
-                  Navigator.pushNamed(context, '/settings');
+                  Navigator.pushNamed(context, '/search');
                 }, 
                 icon: Icon(
-                  Icons.settings
+                  Icons.search
                   ),
                   color: Colors.black,
               ),
+              // IconButton(
+              //   onPressed: (){
+              //     Navigator.pushNamed(context, '/settings');
+              //   }, 
+              //   icon: Icon(
+              //     Icons.settings
+              //     ),
+              //     color: Colors.black,
+              // ),
               IconButton(
                 onPressed: (){
                   Navigator.pushNamed(context, '/home');
                 }, 
                 icon: Icon(
                   Icons.home
-                  ),
-                  color: Colors.black,
-              ),
-              IconButton(
-                onPressed: (){
-                  Navigator.pushNamed(context, '/search');
-                }, 
-                icon: Icon(
-                  Icons.search
                   ),
                   color: Colors.black,
               ),

@@ -74,15 +74,6 @@ class AuthService {
     final currentSupabaseUser = _supabase.auth.currentUser;
     if (currentSupabaseUser != null) {
       final uid = currentSupabaseUser.id;
-      if (!userBox.containsKey(uid)) {
-        await saveUserDataLocally(
-          uid: uid,
-          firstName: '',
-          lastName: '',
-          username: '',
-          email: currentSupabaseUser.email ?? '',
-        );
-      }
       await sessionBox.put('currentUserKey', uid);
     } else {
       await sessionBox.delete('currentUserKey');

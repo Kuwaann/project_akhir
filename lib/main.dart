@@ -26,7 +26,6 @@ import 'services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   // 1. Inisialisasi Hive
   await Hive.initFlutter();
 
@@ -58,6 +57,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(textTheme: GoogleFonts.interTextTheme()),
       routes: {

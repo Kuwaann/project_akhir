@@ -31,6 +31,7 @@ class _BookingSayaPageState extends State<BookingSayaPage> {
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
+          scrolledUnderElevation: 0,
           title: const Text(
             'Booking Saya',
             style: TextStyle(fontSize: 15, fontWeight: FontWeight.w900),
@@ -83,37 +84,6 @@ class _BookingSayaPageState extends State<BookingSayaPage> {
             child: Column(
               children: [
                 const SizedBox(height: 20),
-                TextField(
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: const Color.fromARGB(255, 252, 252, 252),
-                    hintText: 'Cari lapangan...',
-                    prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                    contentPadding:
-                        const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                    enabledBorder: const OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(30)),
-                      borderSide: BorderSide(
-                        color: Color.fromARGB(255, 238, 238, 238),
-                        width: 1,
-                      ),
-                    ),
-                    focusedBorder: const OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(30)),
-                      borderSide: BorderSide(
-                        color: Color.fromARGB(255, 150, 150, 150),
-                        width: 1,
-                      ),
-                    ),
-                  ),
-                  onChanged: (value) {
-                    setState(() {
-                      _searchQuery = value;
-                    });
-                  },
-                ),
-                const SizedBox(height: 30),
-
                 if (filteredBookings.isEmpty)
                   Padding(
                     padding: const EdgeInsets.only(top: 80),
@@ -195,12 +165,12 @@ class ItemLapangan extends StatelessWidget {
         ),
         color: Colors.white,
         boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 5,
-            offset: const Offset(0, 3),
-          ),
+          // BoxShadow(
+          //   color: Colors.grey.withOpacity(0.1),
+          //   spreadRadius: 1,
+          //   blurRadius: 5,
+          //   offset: const Offset(0, 3),
+          // ),
         ],
       ),
       child: InkWell(
@@ -250,6 +220,7 @@ class ItemLapangan extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(15),
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(

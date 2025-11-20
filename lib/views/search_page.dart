@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import '../components/navbar.dart';
 import '../services/lapangan_service.dart';
 import '../models/lapangan_model.dart';
@@ -24,6 +25,7 @@ class _SearchPageState extends State<SearchPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Stack(
@@ -47,6 +49,7 @@ class _SearchPageState extends State<SearchPage> {
                           setState(() => _query = value.toLowerCase());
                         },
                         decoration: InputDecoration(
+                          suffixIcon: Icon(Icons.search),
                           filled: true,
                           fillColor: const Color.fromARGB(255, 252, 252, 252),
                           hintText: 'Cari lapangan...',
@@ -73,11 +76,91 @@ class _SearchPageState extends State<SearchPage> {
                         future: _futureLapangan,
                         builder: (context, snapshot) {
                           if (snapshot.connectionState == ConnectionState.waiting) {
-                            return const Padding(
-                              padding: EdgeInsets.only(top: 100),
-                              child: Center(child: CircularProgressIndicator()),
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 20),
+                              child: Column(
+                                children: List.generate(
+                                  5,
+                                  (index) => Padding(
+                                    padding: const EdgeInsets.only(bottom: 20),
+                                    child: Skeletonizer(
+                                      enabled: true,
+                                      child: Container(
+                                        width: double.infinity,
+                                        height: 150,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(15),
+                                          border: Border.all(
+                                            color: const Color.fromARGB(255, 238, 238, 238),
+                                            width: 1,
+                                          ),
+                                          color: Colors.white,
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Expanded(
+                                              flex: 2,
+                                              child: Container(
+                                                decoration: BoxDecoration(
+                                                  color: Colors.grey[300],
+                                                  borderRadius: const BorderRadius.only(
+                                                    topLeft: Radius.circular(15),
+                                                    bottomLeft: Radius.circular(15),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            Expanded(
+                                              flex: 3,
+                                              child: Padding(
+                                                padding: const EdgeInsets.all(15),
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.spaceBetween,
+                                                  children: [
+                                                    Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment.start,
+                                                      children: [
+                                                        Container(
+                                                            height: 15,
+                                                            width: 120,
+                                                            color: Colors.grey[300]),
+                                                        const SizedBox(height: 10),
+                                                        Container(
+                                                            height: 12,
+                                                            width: 80,
+                                                            color: Colors.grey[300]),
+                                                        const SizedBox(height: 10),
+                                                        Container(
+                                                            height: 12,
+                                                            width: 100,
+                                                            color: Colors.grey[300]),
+                                                      ],
+                                                    ),
+                                                    Container(
+                                                      height: 12,
+                                                      width: 70,
+                                                      color: Colors.grey[300],
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
                             );
-                          } else if (snapshot.hasError) {
+                          }
+
+    // ————— jika sudah tidak loading —————
+
+                          else if (snapshot.hasError) {
                             return Padding(
                               padding: const EdgeInsets.only(top: 100),
                               child: Text(
@@ -109,7 +192,6 @@ class _SearchPageState extends State<SearchPage> {
                           );
                         },
                       ),
-
                       const SizedBox(height: 120),
                     ],
                   ),

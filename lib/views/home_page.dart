@@ -6,6 +6,7 @@ import 'package:project_akhir/models/user_model.dart';
 import 'package:project_akhir/models/lapangan_model.dart';
 import 'package:project_akhir/services/auth/auth_service.dart';
 import 'package:project_akhir/services/location_service.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -20,6 +21,9 @@ class _HomePageState extends State<HomePage> {
 
   List<TempatOlahraga> _lapanganTerdekat = [];
   List<TempatOlahraga> _lapanganRekomendasi = [];
+
+  bool _isLapanganTerdekatSkeletonized = true;
+  bool _isLapanganRekomendasiSkeletonized = true;
 
   @override
   void initState() {
@@ -60,11 +64,14 @@ class _HomePageState extends State<HomePage> {
 
       listDenganJarak.sort((a, b) => a["jarak"].compareTo(b["jarak"]));
 
-      final terdekat =
-          listDenganJarak.take(5).map((e) => e["lap"] as TempatOlahraga).toList();
+      final terdekat = listDenganJarak
+          .take(5)
+          .map((e) => e["lap"] as TempatOlahraga)
+          .toList();
 
       setState(() {
         _lapanganTerdekat = terdekat;
+        _isLapanganTerdekatSkeletonized = false;
       });
     } catch (e) {
       print("Gagal memuat lapangan terdekat: $e");
@@ -79,11 +86,11 @@ class _HomePageState extends State<HomePage> {
           .map((e) => e as TempatOlahraga)
           .toList();
 
-      final rekom =
-          semua.where((lap) => lap.ratingAvg >= 4.5).take(5).toList();
+      final rekom = semua.where((lap) => lap.ratingAvg >= 4.5).take(5).toList();
 
       setState(() {
         _lapanganRekomendasi = rekom;
+        _isLapanganRekomendasiSkeletonized = false;
       });
     } catch (e) {
       print("Gagal memuat rekomendasi: $e");
@@ -102,10 +109,9 @@ class _HomePageState extends State<HomePage> {
               height: double.infinity,
               // padding: EdgeInsets.all(30),
               child: ScrollConfiguration(
-                behavior: ScrollConfiguration.of(context).copyWith(
-                  scrollbars: false,
-                  overscroll: false,
-                ),
+                behavior: ScrollConfiguration.of(
+                  context,
+                ).copyWith(scrollbars: false, overscroll: false),
                 child: SingleChildScrollView(
                   physics: ClampingScrollPhysics(),
                   child: Container(
@@ -117,8 +123,10 @@ class _HomePageState extends State<HomePage> {
                         // ============================
                         Container(
                           width: double.infinity,
-                          padding:
-                              EdgeInsets.symmetric(vertical: 8, horizontal: 20),
+                          padding: EdgeInsets.symmetric(
+                            vertical: 8,
+                            horizontal: 20,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             border: Border.all(color: Colors.grey[200]!),
@@ -159,9 +167,9 @@ class _HomePageState extends State<HomePage> {
                             ],
                           ),
                         ),
-                    
+
                         SizedBox(height: 20),
-                    
+
                         // ============================
                         // BANNER BOOKING
                         // ============================
@@ -181,9 +189,7 @@ class _HomePageState extends State<HomePage> {
                                   'assets/images/bookingsekarang.jpg',
                                   fit: BoxFit.cover,
                                 ),
-                                Container(
-                                  color: Colors.black.withOpacity(0.3),
-                                ),
+                                Container(color: Colors.black.withOpacity(0.3)),
                                 Container(
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 20.0,
@@ -213,15 +219,19 @@ class _HomePageState extends State<HomePage> {
                                         backgroundColor: Colors.white,
                                         foregroundColor: Colors.black,
                                         padding: const EdgeInsets.symmetric(
-                                            horizontal: 40),
+                                          horizontal: 40,
+                                        ),
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(30),
+                                          borderRadius: BorderRadius.circular(
+                                            30,
+                                          ),
                                         ),
                                       ),
                                       child: Text(
                                         "Booking Sekarang",
                                         style: TextStyle(
-                                            fontWeight: FontWeight.bold),
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -230,9 +240,9 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ),
                         ),
-                    
+
                         SizedBox(height: 20),
-                    
+
                         // ============================
                         // BOOKING SAYA BOX
                         // ============================
@@ -247,17 +257,26 @@ class _HomePageState extends State<HomePage> {
                               Expanded(
                                 child: InkWell(
                                   onTap: () => Navigator.pushNamed(
-                                      context, '/booking_saya'),
+                                    context,
+                                    '/booking_saya',
+                                  ),
                                   child: Container(
                                     padding: EdgeInsets.all(20),
                                     child: Row(
                                       children: [
-                                        Icon(Icons.calendar_month,
-                                            size: 24, color: Colors.white),
+                                        Icon(
+                                          Icons.calendar_month,
+                                          size: 24,
+                                          color: Colors.white,
+                                        ),
                                         SizedBox(width: 30),
-                                        Text("Booking Saya",
-                                            style: TextStyle(
-                                                color: Colors.white, fontWeight: FontWeight.bold)),
+                                        Text(
+                                          "Booking Saya",
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
                                       ],
                                     ),
                                   ),
@@ -266,9 +285,9 @@ class _HomePageState extends State<HomePage> {
                             ],
                           ),
                         ),
-                    
+
                         SizedBox(height: 30),
-                    
+
                         // ============================
                         // LAPANGAN TERDEKAT
                         // ============================
@@ -283,98 +302,123 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                             SizedBox(height: 10),
-                    
+
                             SizedBox(
                               height: 170,
-                              child: ListView.separated(
-                                scrollDirection: Axis.horizontal,
-                                itemCount: _lapanganTerdekat.length,
-                                separatorBuilder: (_, __) => SizedBox(width: 15),
-                                itemBuilder: (context, index) {
-                                  final lap = _lapanganTerdekat[index];
-                    
-                                  return InkWell(
-                                    borderRadius: BorderRadius.circular(15),
-                                    onTap: () {
-                                      Navigator.pushNamed(
-                                        context,
-                                        '/detail_lapangan',
-                                        arguments: lap,
-                                      );
-                                    },
-                                    child: Container(
-                                      width: 140,
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(15),
-                                        border:
-                                            Border.all(color: Colors.grey[300]!),
-                                      ),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          ClipRRect(
-                                            borderRadius: BorderRadius.vertical(
-                                                top: Radius.circular(15)),
-                                            child: Image.network(
-                                              lap.imageUrl,
-                                              height: 90,
-                                              width: 140,
-                                              fit: BoxFit.cover,
-                                              errorBuilder:
-                                                  (context, error, stackTrace) {
-                                                return Container(
-                                                  height: 90,
-                                                  width: 140,
-                                                  color: Colors.grey[200],
-                                                  child: Icon(Icons
-                                                      .image_not_supported),
-                                                );
-                                              },
-                                            ),
+                              child: Skeletonizer(
+                                enabled: _isLapanganTerdekatSkeletonized,
+                                ignoreContainers: false,
+                                child: ListView.separated(
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: _lapanganTerdekat.length,
+                                  separatorBuilder: (_, __) =>
+                                      SizedBox(width: 15),
+                                  itemBuilder: (context, index) {
+                                    final lap = _lapanganTerdekat[index];
+
+                                    return InkWell(
+                                      borderRadius: BorderRadius.circular(15),
+                                      onTap: () {
+                                        Navigator.pushNamed(
+                                          context,
+                                          '/detail_lapangan',
+                                          arguments: lap,
+                                        );
+                                      },
+                                      child: Container(
+                                        width: 140,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(
+                                            15,
                                           ),
-                    
-                                          Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Text(
-                                              lap.namaTempat,
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                  fontWeight: FontWeight.bold),
-                                            ),
+                                          border: Border.all(
+                                            color: Colors.grey[300]!,
                                           ),
-                    
-                                          Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 8.0),
-                                            child: Row(
-                                              children: [
-                                                Icon(Icons.star,
-                                                    size: 14,
-                                                    color: Colors.amber),
-                                                SizedBox(width: 4),
-                                                Text(
-                                                  lap.ratingAvg
-                                                      .toStringAsFixed(1),
-                                                  style: TextStyle(fontSize: 12),
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.vertical(
+                                                    top: Radius.circular(15),
+                                                  ),
+                                              child: Image.network(
+                                                lap.imageUrl,
+                                                height: 90,
+                                                width: 140,
+                                                fit: BoxFit.cover,
+                                                errorBuilder:
+                                                    (
+                                                      context,
+                                                      error,
+                                                      stackTrace,
+                                                    ) {
+                                                      return Container(
+                                                        height: 90,
+                                                        width: 140,
+                                                        color: Colors.grey[200],
+                                                        child: Icon(
+                                                          Icons
+                                                              .image_not_supported,
+                                                        ),
+                                                      );
+                                                    },
+                                              ),
+                                            ),
+
+                                            Padding(
+                                              padding: const EdgeInsets.all(
+                                                8.0,
+                                              ),
+                                              child: Text(
+                                                lap.namaTempat,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
                                                 ),
-                                              ],
+                                              ),
                                             ),
-                                          )
-                                        ],
+
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 8.0,
+                                                  ),
+                                              child: Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.star,
+                                                    size: 14,
+                                                    color: Colors.amber,
+                                                  ),
+                                                  SizedBox(width: 4),
+                                                  Text(
+                                                    lap.ratingAvg
+                                                        .toStringAsFixed(1),
+                                                    style: TextStyle(
+                                                      fontSize: 12,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  );
-                                },
+                                    );
+                                  },
+                                ),
                               ),
                             ),
                           ],
                         ),
-                    
+
                         SizedBox(height: 30),
-                    
+
                         // ============================
                         // REKOMENDASI (NEW!)
                         // ============================
@@ -389,97 +433,121 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                             SizedBox(height: 10),
-                    
+
                             SizedBox(
                               height: 170,
-                              child: ListView.separated(
-                                scrollDirection: Axis.horizontal,
-                                itemCount: _lapanganRekomendasi.length,
-                                separatorBuilder: (_, __) =>
-                                    SizedBox(width: 15),
-                                itemBuilder: (context, index) {
-                                  final lap = _lapanganRekomendasi[index];
-                    
-                                  return InkWell(
-                                    borderRadius: BorderRadius.circular(15),
-                                    onTap: () {
-                                      Navigator.pushNamed(
-                                        context,
-                                        '/detail_lapangan',
-                                        arguments: lap,
-                                      );
-                                    },
-                                    child: Container(
-                                      width: 140,
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(15),
-                                        border:
-                                            Border.all(color: Colors.grey[300]!),
-                                      ),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          ClipRRect(
-                                            borderRadius: BorderRadius.vertical(
-                                                top: Radius.circular(15)),
-                                            child: Image.network(
-                                              lap.imageUrl,
-                                              height: 90,
-                                              width: 140,
-                                              fit: BoxFit.cover,
-                                              errorBuilder:
-                                                  (context, error, stackTrace) {
-                                                return Container(
-                                                  height: 90,
-                                                  width: 140,
-                                                  color: Colors.grey[200],
-                                                  child: Icon(Icons
-                                                      .image_not_supported),
-                                                );
-                                              },
-                                            ),
+                              child: Skeletonizer(
+                                enabled: _isLapanganRekomendasiSkeletonized,
+                                ignoreContainers: false,
+                                child: ListView.separated(
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: _lapanganRekomendasi.length,
+                                  separatorBuilder: (_, __) =>
+                                      SizedBox(width: 15),
+                                  itemBuilder: (context, index) {
+                                    final lap = _lapanganRekomendasi[index];
+
+                                    return InkWell(
+                                      borderRadius: BorderRadius.circular(15),
+                                      onTap: () {
+                                        Navigator.pushNamed(
+                                          context,
+                                          '/detail_lapangan',
+                                          arguments: lap,
+                                        );
+                                      },
+                                      child: Container(
+                                        width: 140,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(
+                                            15,
                                           ),
-                    
-                                          Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Text(
-                                              lap.namaTempat,
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                  fontWeight: FontWeight.bold),
-                                            ),
+                                          border: Border.all(
+                                            color: Colors.grey[300]!,
                                           ),
-                    
-                                          Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 8.0),
-                                            child: Row(
-                                              children: [
-                                                Icon(Icons.star,
-                                                    size: 14,
-                                                    color: Colors.amber),
-                                                SizedBox(width: 4),
-                                                Text(
-                                                  lap.ratingAvg
-                                                      .toStringAsFixed(1),
-                                                  style: TextStyle(fontSize: 12),
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.vertical(
+                                                    top: Radius.circular(15),
+                                                  ),
+                                              child: Image.network(
+                                                lap.imageUrl,
+                                                height: 90,
+                                                width: 140,
+                                                fit: BoxFit.cover,
+                                                errorBuilder:
+                                                    (
+                                                      context,
+                                                      error,
+                                                      stackTrace,
+                                                    ) {
+                                                      return Container(
+                                                        height: 90,
+                                                        width: 140,
+                                                        color: Colors.grey[200],
+                                                        child: Icon(
+                                                          Icons
+                                                              .image_not_supported,
+                                                        ),
+                                                      );
+                                                    },
+                                              ),
+                                            ),
+
+                                            Padding(
+                                              padding: const EdgeInsets.all(
+                                                8.0,
+                                              ),
+                                              child: Text(
+                                                lap.namaTempat,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
                                                 ),
-                                              ],
+                                              ),
                                             ),
-                                          )
-                                        ],
+
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 8.0,
+                                                  ),
+                                              child: Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.star,
+                                                    size: 14,
+                                                    color: Colors.amber,
+                                                  ),
+                                                  SizedBox(width: 4),
+                                                  Text(
+                                                    lap.ratingAvg
+                                                        .toStringAsFixed(1),
+                                                    style: TextStyle(
+                                                      fontSize: 12,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  );
-                                },
+                                    );
+                                  },
+                                ),
                               ),
                             ),
                           ],
                         ),
-                    
+
                         SizedBox(height: 120),
                       ],
                     ),

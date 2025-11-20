@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:project_akhir/services/auth/auth_service.dart';
-import 'package:supabase_flutter/supabase_flutter.dart'; 
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -10,15 +10,15 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  final authService = AuthService(); 
-  
+  final authService = AuthService();
+
   final _emailController = TextEditingController();
   final _namaDepanController = TextEditingController();
   final _namaBelakangController = TextEditingController();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  
+
   bool _isLoading = false;
 
   @override
@@ -36,32 +36,41 @@ class _RegisterPageState extends State<RegisterPage> {
     setState(() {
       _isLoading = true;
     });
-    
+
     final email = _emailController.text.trim();
     final namaDepan = _namaDepanController.text.trim();
     final namaBelakang = _namaBelakangController.text.trim();
     final username = _usernameController.text.trim();
     final password = _passwordController.text;
     final confirmPassword = _confirmPasswordController.text;
-    
-    if (email.isEmpty || namaDepan.isEmpty || username.isEmpty || password.isEmpty) {
+
+    if (email.isEmpty ||
+        namaDepan.isEmpty ||
+        username.isEmpty ||
+        password.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Semua kolom wajib diisi")),
         );
       }
-      setState(() { _isLoading = false; });
-      return; 
+      setState(() {
+        _isLoading = false;
+      });
+      return;
     }
 
     if (password != confirmPassword) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Password dan Konfirmasi Password tidak sesuai")),
+          const SnackBar(
+            content: Text("Password dan Konfirmasi Password tidak sesuai"),
+          ),
         );
       }
-      setState(() { _isLoading = false; });
-      return; 
+      setState(() {
+        _isLoading = false;
+      });
+      return;
     }
 
     try {
@@ -71,11 +80,13 @@ class _RegisterPageState extends State<RegisterPage> {
       );
 
       final String? uid = response.user?.id;
-      
+
       if (uid == null) {
-        throw const AuthException('Gagal mendapatkan ID pengguna dari Supabase.');
+        throw const AuthException(
+          'Gagal mendapatkan ID pengguna dari Supabase.',
+        );
       }
-      
+
       await authService.saveUserDataLocally(
         uid: uid,
         firstName: namaDepan,
@@ -89,12 +100,11 @@ class _RegisterPageState extends State<RegisterPage> {
       if (mounted) {
         Navigator.pushReplacementNamed(context, '/home');
       }
-
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text("Error Registrasi: ${e.toString()}")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error Registrasi: ${e.toString()}")),
+        );
       }
     } finally {
       if (mounted) {
@@ -108,9 +118,11 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       extendBodyBehindAppBar: true,
       backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       appBar: AppBar(
+        scrolledUnderElevation: 0,
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
@@ -118,7 +130,12 @@ class _RegisterPageState extends State<RegisterPage> {
       body: SingleChildScrollView(
         child: Container(
           width: double.infinity,
-          padding: const EdgeInsets.only(top: 80, left: 50, right: 50, bottom: 50),
+          padding: const EdgeInsets.only(
+            top: 80,
+            left: 50,
+            right: 50,
+            bottom: 50,
+          ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -137,7 +154,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                     ),
                     Text(
-                      "Daftar untuk membuat akun.", 
+                      "Daftar untuk membuat akun.",
                       textAlign: TextAlign.left,
                       style: TextStyle(
                         color: Color.fromARGB(255, 0, 0, 0),
@@ -149,7 +166,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
               ),
               const SizedBox(height: 50),
-              
+
               Column(
                 children: [
                   Row(
@@ -159,7 +176,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           controller: _namaDepanController,
                           decoration: InputDecoration(
                             filled: true,
-                            fillColor: const Color.fromARGB(255, 252, 252, 252),
+                            fillColor: Colors.transparent,
                             labelText: "Nama Depan",
                             border: UnderlineInputBorder(
                               borderRadius: BorderRadius.circular(15),
@@ -173,7 +190,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           controller: _namaBelakangController,
                           decoration: InputDecoration(
                             filled: true,
-                            fillColor: const Color.fromARGB(255, 252, 252, 252),
+                            fillColor: Colors.transparent,
                             labelText: "Nama Belakang",
                             border: UnderlineInputBorder(
                               borderRadius: BorderRadius.circular(15),
@@ -184,12 +201,12 @@ class _RegisterPageState extends State<RegisterPage> {
                     ],
                   ),
                   const SizedBox(height: 20),
-                  
+
                   TextFormField(
                     controller: _usernameController,
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: const Color.fromARGB(255, 252, 252, 252),
+                      fillColor: Colors.transparent,
                       labelText: "Username",
                       border: UnderlineInputBorder(
                         borderRadius: BorderRadius.circular(0),
@@ -197,13 +214,13 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  
+
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: const Color.fromARGB(255, 252, 252, 252),
+                      fillColor: Colors.transparent,
                       labelText: "Email",
                       border: UnderlineInputBorder(
                         borderRadius: BorderRadius.circular(0),
@@ -211,13 +228,13 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  
+
                   TextFormField(
                     controller: _passwordController,
                     obscureText: true,
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: const Color.fromARGB(255, 252, 252, 252),
+                      fillColor: Colors.transparent,
                       labelText: "Password",
                       border: UnderlineInputBorder(
                         borderRadius: BorderRadius.circular(0),
@@ -225,27 +242,27 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  
+
                   TextFormField(
                     controller: _confirmPasswordController,
                     obscureText: true,
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: const Color.fromARGB(255, 252, 252, 252),
+                      fillColor: Colors.transparent,
                       labelText: "Konfirmasi Password",
                       border: UnderlineInputBorder(
                         borderRadius: BorderRadius.circular(0),
                       ),
                     ),
                   ),
-                  
+
                   const SizedBox(height: 40),
-                  
+
                   SizedBox(
                     width: double.infinity,
-                    height: 40, 
+                    height: 40,
                     child: ElevatedButton(
-                      onPressed: _isLoading ? null : register, 
+                      onPressed: _isLoading ? null : register,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color.fromARGB(255, 0, 0, 0),
                         elevation: 0,
@@ -263,20 +280,23 @@ class _RegisterPageState extends State<RegisterPage> {
                             ),
                     ),
                   ),
-                  
+
                   const SizedBox(height: 20),
-                  
+
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text("Sudah punya akun?"),
+                      Text("Sudah punya akun?"),
                       GestureDetector(
                         onTap: () {
-                          Navigator.pushNamed(context,'/login'); 
+                          Navigator.pushNamed(context, '/login');
                         },
                         child: const Text(
                           " Masuk di sini.",
-                          style: TextStyle(fontWeight: FontWeight.w800, color: Colors.blue),
+                          style: TextStyle(
+                            fontWeight: FontWeight.w800,
+                            color: Colors.blue,
+                          ),
                         ),
                       ),
                     ],

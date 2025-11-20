@@ -26,7 +26,7 @@ class _WelcomePageState extends State<WelcomePage> {
                     width: double.infinity,
                     height: double.infinity,
                   ),
-        
+
                   // 🎨 Fade-out gradient di bagian bawah
                   Align(
                     alignment: Alignment.bottomCenter,
@@ -37,11 +37,11 @@ class _WelcomePageState extends State<WelcomePage> {
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: [
-                            Colors.transparent, 
-                            Color.fromARGB(255, 0, 0, 0), 
-                            Color.fromARGB(255, 0, 0, 0), 
+                            Colors.transparent,
+                            Color.fromARGB(255, 0, 0, 0),
+                            Color.fromARGB(255, 0, 0, 0),
                           ],
-                          stops: [0.0, 0.7, 1.0]
+                          stops: [0.0, 0.7, 1.0],
                         ),
                       ),
                     ),
@@ -84,9 +84,9 @@ class _WelcomePageState extends State<WelcomePage> {
                       Container(
                         height: 50,
                         child: ElevatedButton(
-                          onPressed: (){
+                          onPressed: () {
                             Navigator.pushNamed(context, '/login');
-                          }, 
+                          },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.white,
                             foregroundColor: Colors.black,
@@ -94,30 +94,28 @@ class _WelcomePageState extends State<WelcomePage> {
                           ),
                           child: Text(
                             "Masuk",
-                            style: TextStyle(
-                              fontWeight: FontWeight.w900
-                            ),
-                          )
+                            style: TextStyle(fontWeight: FontWeight.w900),
+                          ),
                         ),
                       ),
                       SizedBox(height: 15),
                       Container(
                         height: 50,
                         child: ElevatedButton(
-                          onPressed: (){
+                          onPressed: () {
                             Navigator.pushNamed(context, '/register');
-                          }, 
+                          },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: Colors.black,
+                            backgroundColor: Colors.transparent,
                             shadowColor: Colors.transparent,
                           ),
                           child: Text(
                             "Daftar",
                             style: TextStyle(
-                              fontWeight: FontWeight.w900
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white,
                             ),
-                          )
+                          ),
                         ),
                       ),
                       SizedBox(height: 15),
@@ -135,7 +133,7 @@ class _WelcomePageState extends State<WelcomePage> {
                 ),
               ),
             ),
-          ]
+          ],
         ),
       ),
     );

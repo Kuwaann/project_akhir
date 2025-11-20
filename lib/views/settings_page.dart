@@ -10,14 +10,63 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   final authService = AuthService();
-  
+
+  Future<void> showLogoutDialog(BuildContext context) async {
+    return showDialog(
+      context: context,
+      barrierDismissible: true, // tidak bisa tutup dengan tap luar
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Text(
+            "Konfirmasi Logout",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: Text("Apakah kamu yakin ingin logout?"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(), // batal
+              child: Text("Batal", style: TextStyle(color: Colors.black)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shadowColor: Colors.transparent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+              onPressed: () {
+                authService.signOut();
+                if (mounted) {
+                  Navigator.pushReplacementNamed(context, '/');
+                }
+              },
+              child: Text(
+                "Logout",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('Settings', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w900),), 
+        title: Text(
+          'Settings',
+          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w900),
+        ),
         backgroundColor: Colors.white,
       ),
       body: SafeArea(
@@ -30,10 +79,16 @@ class _SettingsPageState extends State<SettingsPage> {
                 children: [
                   ListTile(
                     leading: Icon(Icons.person, color: Colors.black, size: 16),
-                    title: Text('Akun', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w900),), 
-                    onTap: (){
-                      Navigator.pushNamed(context,'/profil');
-                    }
+                    title: Text(
+                      'Akun',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    onTap: () {
+                      Navigator.pushNamed(context, '/profil');
+                    },
                   ),
                   Container(
                     width: double.infinity,
@@ -48,10 +103,16 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                   ListTile(
                     leading: Icon(Icons.message, color: Colors.black, size: 16),
-                    title: Text('Saran & Kesan', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w900),), 
-                    onTap: (){
+                    title: Text(
+                      'Saran & Kesan',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    onTap: () {
                       Navigator.pushNamed(context, '/sarankesan');
-                    }
+                    },
                   ),
                   Container(
                     width: double.infinity,
@@ -65,20 +126,27 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                   ),
                   ListTile(
-                    leading: Icon(Icons.exit_to_app, color: const Color.fromARGB(255, 255, 67, 67), size: 16),
-                    title: Text('Log Out', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w900),), 
-                    onTap: (){
-                      authService.signOut();
-                      if (mounted) {
-                        Navigator.pushReplacementNamed(context, '/');
-                      }
-                    }
+                    leading: Icon(
+                      Icons.exit_to_app,
+                      color: const Color.fromARGB(255, 255, 67, 67),
+                      size: 16,
+                    ),
+                    title: Text(
+                      'Log Out',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    onTap: () {
+                      showLogoutDialog(context);
+                    },
                   ),
                 ],
-              )
+              ),
             ],
           ),
-        )
+        ),
       ),
     );
   }

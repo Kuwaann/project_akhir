@@ -24,24 +24,27 @@ class _LoginPageState extends State<LoginPage> {
       if (user != null && mounted) {
         Navigator.pushReplacementNamed(context, '/home');
       } else if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Gagal login, coba lagi")));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("Gagal login, coba lagi")));
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text("Error: $e")));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Error: $e")));
       }
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       extendBodyBehindAppBar: true,
       backgroundColor: Color.fromARGB(255, 255, 255, 255),
       appBar: AppBar(
+        scrolledUnderElevation: 0,
         backgroundColor: Colors.transparent,
       ),
       body: Container(
@@ -88,8 +91,8 @@ class _LoginPageState extends State<LoginPage> {
                       fillColor: Colors.transparent,
                       labelText: "Email",
                       border: UnderlineInputBorder(
-                          borderRadius: BorderRadius.circular(0),
-                      )
+                        borderRadius: BorderRadius.circular(0),
+                      ),
                     ),
                   ),
                   SizedBox(height: 20),
@@ -116,12 +119,12 @@ class _LoginPageState extends State<LoginPage> {
                         shadowColor: Colors.transparent,
                       ),
                       child: Text(
-                          "Sign In",
-                          style: TextStyle(
-                            color: const Color.fromARGB(255, 255, 255, 255),
-                            fontWeight: FontWeight.w800,
-                            fontSize: 15,
-                          ),
+                        "Sign In",
+                        style: TextStyle(
+                          color: const Color.fromARGB(255, 255, 255, 255),
+                          fontWeight: FontWeight.w800,
+                          fontSize: 15,
+                        ),
                       ),
                     ),
                   ),
@@ -130,22 +133,22 @@ class _LoginPageState extends State<LoginPage> {
                     children: [
                       Text("Belum punya akun?"),
                       GestureDetector(
-                        onTap: (){
+                        onTap: () {
                           Navigator.pushNamed(context, '/register');
                         },
-                        child: Text(" Daftar di sini.", 
+                        child: Text(
+                          " Daftar di sini.",
                           style: TextStyle(
                             fontWeight: FontWeight.w800,
-                            color: Colors.blue
+                            color: Colors.blue,
                           ),
-                        )
-                      )
+                        ),
+                      ),
                     ],
                   ),
                 ],
               ),
             ),
-            
           ],
         ),
       ),

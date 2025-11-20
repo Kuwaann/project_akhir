@@ -47,7 +47,7 @@ class TempatOlahraga extends HiveObject {
 
   factory TempatOlahraga.fromJson(Map<String, dynamic> json) {
     return TempatOlahraga(
-      id: json['id'] as String,
+      id: json['id'].toString(),
       namaTempat: json['nama_tempat'] as String,
       jenisLapangan: json['jenis_lapangan'] as String,
       lokasiWilayah: json['wilayah'] as String,

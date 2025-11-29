@@ -14,7 +14,7 @@ class LapanganDetail extends StatefulWidget {
 
 class _LapanganDetailState extends State<LapanganDetail> {
   final LapanganService lapanganService = LapanganService();
-  double? distanceInKm; 
+  double? distanceInKm;
 
   @override
   void initState() {
@@ -27,9 +27,8 @@ class _LapanganDetailState extends State<LapanganDetail> {
       LocationPermission permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied ||
           permission == LocationPermission.deniedForever) {
-        
         if (!mounted) return;
-        setState(() => distanceInKm = -1); 
+        setState(() => distanceInKm = -1);
         return;
       }
 
@@ -54,7 +53,6 @@ class _LapanganDetailState extends State<LapanganDetail> {
     }
   }
 
-
   Widget _buildRatingStars(double rating) {
     int fullStars = rating.floor();
     bool hasHalfStar = rating - fullStars >= 0.5;
@@ -67,7 +65,9 @@ class _LapanganDetailState extends State<LapanganDetail> {
       stars.add(const Icon(Icons.star_half, color: Colors.amber, size: 16));
     }
     while (stars.length < 5) {
-      stars.add(Icon(Icons.star_border, color: Colors.amber.withOpacity(0.5), size: 16));
+      stars.add(
+        Icon(Icons.star_border, color: Colors.amber.withOpacity(0.5), size: 16),
+      );
     }
     return Row(children: stars);
   }
@@ -94,7 +94,10 @@ class _LapanganDetailState extends State<LapanganDetail> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         scrolledUnderElevation: 0,
-        title: const Text('Detail', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w900)),
+        title: const Text(
+          'Detail',
+          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w900),
+        ),
         backgroundColor: Colors.white,
         elevation: 0,
       ),
@@ -112,7 +115,7 @@ class _LapanganDetailState extends State<LapanganDetail> {
                   child: Image.network(
                     tempat.imageUrl,
                     width: double.infinity,
-                    height: 250,
+                    height: 200,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) =>
                         const Center(child: Icon(Icons.broken_image, size: 80)),
@@ -122,7 +125,10 @@ class _LapanganDetailState extends State<LapanganDetail> {
 
                 Text(
                   tempat.namaTempat,
-                  style: const TextStyle(fontSize: 23, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    fontSize: 23,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 const SizedBox(height: 5),
 
@@ -150,8 +156,10 @@ class _LapanganDetailState extends State<LapanganDetail> {
                     const Icon(Icons.location_on, color: Colors.red, size: 18),
                     const SizedBox(width: 5),
                     Expanded(
-                      child: Text(tempat.lokasiWilayah,
-                          style: const TextStyle(fontSize: 14)),
+                      child: Text(
+                        tempat.lokasiWilayah,
+                        style: const TextStyle(fontSize: 14),
+                      ),
                     ),
                   ],
                 ),
@@ -178,9 +186,13 @@ class _LapanganDetailState extends State<LapanganDetail> {
                     children: [
                       Icon(Icons.map, color: Colors.blue, size: 16),
                       SizedBox(width: 5),
-                      Text("Lihat di Maps",
-                          style: TextStyle(
-                              color: Colors.blue, fontWeight: FontWeight.w500)),
+                      Text(
+                        "Lihat di Maps",
+                        style: TextStyle(
+                          color: Colors.blue,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -200,7 +212,9 @@ class _LapanganDetailState extends State<LapanganDetail> {
                       Text(
                         _formatRupiah(tempat.hargaSewa),
                         style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.w600),
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ],
                   ),
@@ -214,24 +228,26 @@ class _LapanganDetailState extends State<LapanganDetail> {
         color: Colors.transparent,
         shadowColor: Colors.transparent,
         child: ElevatedButton(
-            onPressed: (){
-              Navigator.pushNamed(context, '/booking', arguments: tempat);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.black,
-              foregroundColor: Colors.white,
-              shadowColor: Colors.transparent,
-              elevation: 0,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+          onPressed: () {
+            Navigator.pushNamed(context, '/booking', arguments: tempat);
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.black,
+            foregroundColor: Colors.white,
+            shadowColor: Colors.transparent,
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
             ),
-            child: Text(
-              'Book Sekarang',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 15,
-                fontWeight: FontWeight.w900
-              ),
-            )
+          ),
+          child: Text(
+            'Book Sekarang',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 15,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
         ),
       ),
     );

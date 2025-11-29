@@ -14,7 +14,7 @@ class BookingSayaPage extends StatefulWidget {
 
 class _BookingSayaPageState extends State<BookingSayaPage> {
   late final Box<BookingModel> _bookingBox;
-  String _searchQuery = ''; 
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -68,17 +68,19 @@ class _BookingSayaPageState extends State<BookingSayaPage> {
       builder: (context, box, child) {
         final allBookings = box.values.toList();
         final filteredBookings = allBookings
-          .where((b) => b.userId == widget.userId)
-          .where((b) => b.bookingType == tabType)
-          .where((b) =>
-              (b.namaLapangan ?? '').toLowerCase().contains(_searchQuery.toLowerCase()))
-          .toList();
+            .where((b) => b.userId == widget.userId)
+            .where((b) => b.bookingType == tabType)
+            .where(
+              (b) => (b.namaLapangan ?? '').toLowerCase().contains(
+                _searchQuery.toLowerCase(),
+              ),
+            )
+            .toList();
 
         return ScrollConfiguration(
-          behavior: ScrollConfiguration.of(context).copyWith(
-            scrollbars: false,
-            overscroll: false,
-          ),
+          behavior: ScrollConfiguration.of(
+            context,
+          ).copyWith(scrollbars: false, overscroll: false),
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 30),
             child: Column(
@@ -100,10 +102,12 @@ class _BookingSayaPageState extends State<BookingSayaPage> {
                 else
                   Column(
                     children: filteredBookings
-                        .map((booking) => Padding(
-                              padding: const EdgeInsets.only(bottom: 15),
-                              child: ItemLapangan(booking: booking),
-                            ))
+                        .map(
+                          (booking) => Padding(
+                            padding: const EdgeInsets.only(bottom: 15),
+                            child: ItemLapangan(booking: booking),
+                          ),
+                        )
                         .toList(),
                   ),
 
@@ -127,23 +131,20 @@ class ItemLapangan extends StatelessWidget {
       case 'Pending':
         return {
           'color': Colors.blue.shade100,
-          'textColor': Colors.blue.shade700
+          'textColor': Colors.blue.shade700,
         };
       case 'Paid':
         return {
           'color': Colors.green.shade100,
-          'textColor': Colors.green.shade700
+          'textColor': Colors.green.shade700,
         };
       case 'Selesai':
         return {
           'color': Colors.grey.shade300,
-          'textColor': Colors.grey.shade700
+          'textColor': Colors.grey.shade700,
         };
       case 'Dibatalkan':
-        return {
-          'color': Colors.red.shade100,
-          'textColor': Colors.red.shade700
-        };
+        return {'color': Colors.red.shade100, 'textColor': Colors.red.shade700};
       default:
         return {'color': Colors.grey.shade100, 'textColor': Colors.black};
     }
@@ -176,11 +177,7 @@ class ItemLapangan extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(15),
         onTap: () {
-          Navigator.pushNamed(
-            context,
-            '/detail_book',
-            arguments: booking,
-          );
+          Navigator.pushNamed(context, '/detail_book', arguments: booking);
         },
         child: Row(
           children: [
@@ -200,8 +197,11 @@ class ItemLapangan extends StatelessWidget {
                           return Container(
                             color: Colors.grey.shade300,
                             child: const Center(
-                              child: Icon(Icons.broken_image,
-                                  size: 40, color: Colors.grey),
+                              child: Icon(
+                                Icons.broken_image,
+                                size: 40,
+                                color: Colors.grey,
+                              ),
                             ),
                           );
                         },
@@ -209,8 +209,11 @@ class ItemLapangan extends StatelessWidget {
                     : Container(
                         color: Colors.grey.shade300,
                         child: const Center(
-                          child: Icon(Icons.sports_soccer,
-                              size: 40, color: Colors.grey),
+                          child: Icon(
+                            Icons.sports_soccer,
+                            size: 40,
+                            color: Colors.grey,
+                          ),
                         ),
                       ),
               ),
@@ -234,23 +237,35 @@ class ItemLapangan extends StatelessWidget {
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        const Icon(Icons.sports_soccer,
-                            color: Colors.black, size: 16),
+                        const Icon(
+                          Icons.sports_soccer,
+                          color: Colors.black,
+                          size: 16,
+                        ),
                         const SizedBox(width: 5),
-                        Text(booking.jenisLapangan,
-                            style: TextStyle(
-                                fontSize: 12, color: Colors.grey.shade700)),
+                        Text(
+                          booking.jenisLapangan,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey.shade700,
+                          ),
+                        ),
                       ],
                     ),
                     Row(
                       children: [
-                        const Icon(Icons.calendar_month,
-                            color: Colors.black, size: 16),
+                        const Icon(
+                          Icons.calendar_month,
+                          color: Colors.black,
+                          size: 16,
+                        ),
                         const SizedBox(width: 5),
                         Text(
                           dateFormatter.format(booking.tanggalBooking),
                           style: TextStyle(
-                              fontSize: 12, color: Colors.grey.shade700),
+                            fontSize: 12,
+                            color: Colors.grey.shade700,
+                          ),
                         ),
                       ],
                     ),
@@ -260,7 +275,9 @@ class ItemLapangan extends StatelessWidget {
                       children: [
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 4),
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: statusStyle['color'],
                             borderRadius: BorderRadius.circular(15),
@@ -276,13 +293,18 @@ class ItemLapangan extends StatelessWidget {
                         ),
                         Row(
                           children: [
-                            const Icon(Icons.access_time,
-                                color: Colors.black54, size: 16),
+                            const Icon(
+                              Icons.access_time,
+                              color: Colors.black54,
+                              size: 16,
+                            ),
                             const SizedBox(width: 5),
                             Text(
                               '${booking.jamMulai} - ${booking.jamSelesai}',
                               style: const TextStyle(
-                                  fontSize: 12, fontWeight: FontWeight.w600),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ],
                         ),
